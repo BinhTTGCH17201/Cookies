@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.binh.android.cookies.newpost.viewmodel.NewPostViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".newpost.AddNewPostFragment">
+            <!-- Title Input  -->
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/post_title_label"
+                style="@style/input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="@string/title_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/post_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@={viewModel.title}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!--        Food type dropdown menus-->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/food_type"
+                style="@style/menu_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/food_type_label"
+                app:layout_constraintEnd_toEndOf="@+id/post_title_label"
+                app:layout_constraintStart_toStartOf="@+id/post_title_label"
+                app:layout_constraintTop_toBottomOf="@id/post_title_label">
+
+                <AutoCompleteTextView
+                    android:id="@+id/food_menu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:text="@={viewModel.type}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!--        Ingredient Input-->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/post_ingredient_label"
+                style="@style/input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/ingredient_label"
+                app:layout_constraintEnd_toEndOf="@+id/food_type"
+                app:layout_constraintStart_toStartOf="@+id/food_type"
+                app:layout_constraintTop_toBottomOf="@id/food_type">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/post_ingredient"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textMultiLine"
+                    android:overScrollMode="always"
+                    android:scrollbarStyle="insideInset"
+                    android:scrollbars="vertical"
+                    android:text="@={viewModel.ingredient}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:id="@+id/people_time_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="@id/post_ingredient_label"
+                app:layout_constraintStart_toStartOf="@id/post_ingredient_label"
+                app:layout_constraintTop_toBottomOf="@id/post_ingredient_label">
+                <!--        People eat Input-->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/post_people_label"
+                    style="@style/input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:gravity="center"
+                    android:hint="@string/people_label">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/post_people"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="@={viewModel.people}" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!--        Making time-->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/post_time_label"
+                    style="@style/input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:gravity="center"
+                    android:hint="@string/time_label"
+                    app:helperText="@string/helper_text_time"
+                    app:helperTextEnabled="true">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/post_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:text="@={viewModel.time}" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!--        Preparation Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/post_preparation_label"
+                style="@style/input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/preparation_label"
+                app:layout_constraintEnd_toEndOf="@+id/people_time_input"
+                app:layout_constraintStart_toStartOf="@+id/people_time_input"
+                app:layout_constraintTop_toBottomOf="@id/people_time_input">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/post_preparation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textMultiLine"
+                    android:overScrollMode="always"
+                    android:scrollbarStyle="insideInset"
+                    android:scrollbars="vertical"
+                    android:text="@={viewModel.preparation}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!--        Image picker-->
+            <ImageView
+                android:id="@+id/post_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:contentDescription="@string/post_preview_image_desc"
+                app:layout_constraintEnd_toEndOf="@id/post_preparation_label"
+                app:layout_constraintStart_toStartOf="@id/post_preparation_label"
+                app:layout_constraintTop_toBottomOf="@id/post_preparation_label"
+                app:postImageUrl="@{viewModel.photoUrl}"
+                app:srcCompat="@drawable/choose_image_placeholder" />
+
+            <Button
+                android:id="@+id/submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_new_post_button_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/post_photo" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</layout>

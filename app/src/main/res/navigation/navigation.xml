@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation"
+    app:startDestination="@id/postList">
+    <fragment
+        android:id="@+id/addNewPost"
+        android:name="com.binh.android.cookies.newpost.AddNewPostFragment"
+        android:label="Add new recipe" />
+    <fragment
+        android:id="@+id/postList"
+        android:name="com.binh.android.cookies.home.PostListFragment"
+        android:label="Recipes" />
+    <fragment
+        android:id="@+id/accountFragment"
+        android:name="com.binh.android.cookies.account.AccountFragment"
+        android:label="Account" />
+</navigation>

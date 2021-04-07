@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Cookies</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="text_post_header">Post Header</string>
+    <string name="account_menu_title">Account</string>
+    <string name="home_menu_title">Home</string>
+    <string name="about_menu_title">About</string>
+    <string name="name_hint_input">Name</string>
+    <string name="email_hint_input">Email</string>
+    <string name="password_hint_input">Password</string>
+    <string name="repassword_hint_input">Re Enter Password</string>
+    <string name="login_unsuccessful_msg">Login unsuccessful</string>
+    <string name="login_button_text">Login</string>
+    <string name="logout_button_text">Logout</string>
+    <string name="title_label">Title</string>
+    <string name="ingredient_label">Ingredient</string>
+    <string name="people_label">People</string>
+    <string name="time_label">Time</string>
+    <string name="helper_text_time">Minutes</string>
+    <string name="post_preview_image_desc">Preview Post Image</string>
+    <string name="add_new_post_button_text">Add</string>
+    <string name="food_type_label">Food type</string>
+    <string name="daily_label">Daily</string>
+    <string name="occasionss_label">Occasions</string>
+    <string name="easy_label">Easy</string>
+    <string name="loading_label">Loading...</string>
+    <string name="update_profile_button_text">Update profile</string>
+    <string name="healthy_label">Healthy</string>
+    <string name="comment_hint">Comment</string>
+    <string name="comment_label">Comments</string>
+    <string name="preparation_label">Preparation</string>
+    <string name="comment_button">Send</string>
+    <string name="search_menu_title">Search</string>
+    <string name="search_menu_label">Search</string>
+    <string name="search_hint">Search for recipe</string>
+    <string name="new_recipe_menu">New recipe</string>
+</resources>

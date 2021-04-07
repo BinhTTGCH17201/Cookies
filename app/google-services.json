@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "188904882071",
+    "firebase_url": "https://cooking-forum-default-rtdb.firebaseio.com",
+    "project_id": "cooking-forum",
+    "storage_bucket": "cooking-forum.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188904882071:android:3c1453aab9c7afd9d00ed2",
+        "android_client_info": {
+          "package_name": "com.binh.android.cookies"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "188904882071-cb5imubdabiogaml68rf3ahqahn27v66.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.binh.android.cookies",
+            "certificate_hash": "77dde4c54358eb0707cecc3eb5273e15205da30b"
+          }
+        },
+        {
+          "client_id": "188904882071-8804j0upsqlk7vhd4e6ilboosq5m34h6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUsrYI4EJKZ8jIh5Y0zEcI_ibNed_H5Sc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "188904882071-8804j0upsqlk7vhd4e6ilboosq5m34h6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

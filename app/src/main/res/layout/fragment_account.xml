@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.binh.android.cookies.account.AccountViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".account.AccountFragment">
+
+            <ImageView
+                android:id="@+id/account_image"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginTop="32dp"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop"
+                app:accountImageUrl="@{viewModel.photoUrl}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_account_default" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/name_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_text_field"
+                android:layout_marginTop="@dimen/margin_text_field_image"
+                android:layout_marginEnd="@dimen/margin_text_field"
+                android:hint="@string/name_hint_input"
+                android:visibility="@{viewModel.uiVisible ? View.VISIBLE: View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/account_image">
+
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/name_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@={viewModel.name}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/email_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_text_field"
+                android:layout_marginTop="@dimen/margin_text_field_top"
+                android:layout_marginEnd="@dimen/margin_text_field"
+                android:hint="@string/email_hint_input"
+                android:visibility="@{viewModel.uiVisible ? View.VISIBLE: View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/name_layout">
+
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/email_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="textEmailAddress"
+                    android:text="@={viewModel.email}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/password_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_text_field"
+                android:layout_marginTop="@dimen/margin_text_field_top"
+                android:layout_marginEnd="@dimen/margin_text_field"
+                android:visibility="@{viewModel.uiVisible ? View.VISIBLE: View.GONE}"
+                app:endIconMode="password_toggle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/email_layout">
+
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/password_hint_input"
+                    android:inputType="textPassword"
+                    android:text="@={viewModel.password}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/re_password_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_text_field"
+                android:layout_marginTop="@dimen/margin_text_field_top"
+                android:layout_marginEnd="@dimen/margin_text_field"
+                android:visibility="@{viewModel.uiVisible ? View.VISIBLE: View.GONE}"
+                app:endIconMode="password_toggle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/password_layout">
+
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/re_password_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/repassword_hint_input"
+                    android:inputType="textPassword"
+                    android:text="@={viewModel.rePassword}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/update_profile_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_text_field"
+                android:layout_marginTop="@dimen/margin_text_field_image"
+                android:layout_marginEnd="@dimen/margin_text_field"
+                android:onClick="@{()->viewModel.updateUserProfile()}"
+                android:text="@string/update_profile_button_text"
+                android:visibility="@{viewModel.uiVisible ? View.VISIBLE: View.GONE}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/re_password_layout"
+                tools:text="Update profile" />
+
+            <Button
+                android:id="@+id/login_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_text_field"
+                android:layout_marginTop="@dimen/margin_text_field_top"
+                android:layout_marginEnd="@dimen/margin_text_field"
+                android:text="@{viewModel.buttonText}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/update_profile_button"
+                tools:text="Login" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</layout>
