@@ -1,7 +1,6 @@
 package com.binh.android.cookies
 
 import android.app.SearchManager
-import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
 import android.view.Menu
@@ -13,7 +12,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.binh.android.cookies.data.User
 import com.binh.android.cookies.databinding.ActivityMainBinding
-import com.binh.android.cookies.searchable.SearchableActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -29,6 +27,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setTheme(R.style.Theme_Cookies)
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        FirebaseDatabase.getInstance().reference.keepSynced(true)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         val navHostFragment =
@@ -67,12 +67,7 @@ class MainActivity : AppCompatActivity() {
             // Assumes current activity is the searchable activity
 
             setSearchableInfo(
-                searchManager.getSearchableInfo(
-                    ComponentName(
-                        context,
-                        SearchableActivity::class.java
-                    )
-                )
+                searchManager.getSearchableInfo(componentName)
             )
             setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
         }

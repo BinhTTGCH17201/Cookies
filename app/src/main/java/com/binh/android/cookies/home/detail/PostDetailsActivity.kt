@@ -14,6 +14,7 @@ import com.binh.android.cookies.home.detail.adapter.CommentAdapter
 import com.binh.android.cookies.home.detail.viewmodel.PostDetailsViewModel
 import com.binh.android.cookies.home.detail.viewmodel.PostDetailsViewModelFactory
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.firebase.database.FirebaseDatabase
@@ -73,6 +74,7 @@ class PostDetailsActivity : AppCompatActivity() {
                 .load(post.photoUrl)
                 .apply(
                     RequestOptions()
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .centerCrop()
                         .placeholder(R.drawable.loading_animation)
                         .error(R.drawable.ic_broken_image)

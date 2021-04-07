@@ -9,6 +9,7 @@ import com.binh.android.cookies.R
 import com.binh.android.cookies.data.Post
 import com.binh.android.cookies.databinding.ItemSearchBinding
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.firebase.ui.database.FirebaseRecyclerOptions
@@ -27,6 +28,7 @@ class PostSearchAdapter(
                 .load(post.photoUrl.toUri())
                 .apply(
                     RequestOptions()
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                         .centerCrop()
                         .placeholder(R.drawable.loading_animation)
                         .error(R.drawable.ic_broken_image)

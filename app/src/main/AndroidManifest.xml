@@ -12,14 +12,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Cookies">
-        <activity android:name=".searchable.SearchableActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
         <activity
             android:name=".home.detail.PostDetailsActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
@@ -33,9 +25,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".SearchableActivity" />
         </activity>
     </application>
 
