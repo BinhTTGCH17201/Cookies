@@ -4,27 +4,28 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.net.toUri
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.algolia.instantsearch.helper.android.highlighting.toSpannedString
 import com.binh.android.cookies.R
-import com.binh.android.cookies.data.Post
+import com.binh.android.cookies.data.PostSearched
 import com.binh.android.cookies.databinding.ItemSearchBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.firebase.ui.database.FirebaseRecyclerAdapter
-import com.firebase.ui.database.FirebaseRecyclerOptions
 
 class PostSearchAdapter(
-    private val options: FirebaseRecyclerOptions<Post>,
-    private val onItemClicked: (Post, ImageView) -> Unit
+    private val onItemClicked: (PostSearched, ImageView) -> Unit
 ) :
-    FirebaseRecyclerAdapter<Post, PostSearchAdapter.PostViewHolder>(options) {
+    PagedListAdapter<PostSearched, PostSearchAdapter.PostViewHolder>(PostSearchAdapter) {
+
     class PostViewHolder(private val binding: ItemSearchBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(post: Post, onItemClicked: (Post, ImageView) -> Unit) {
-            binding.postTitle.text = post.title
-            Glide.with(binding.photo)
+        fun bind(post: PostSearched, onItemClicked: (PostSearched, ImageView) -> Unit) {
+            binding.postTitleSearch.text = post.highlightedTitle?.toSpannedString() ?: post.title
+            Glide.with(binding.photoSearch)
                 .load(post.photoUrl.toUri())
                 .apply(
                     RequestOptions()
@@ -32,11 +33,13 @@ class PostSearchAdapter(
                         .centerCrop()
                         .placeholder(R.drawable.loading_animation)
                         .error(R.drawable.ic_broken_image)
-                ).into(binding.photo)
+                ).into(binding.photoSearch)
 
             binding.root.setOnClickListener {
-                onItemClicked(post, binding.photo)
+                onItemClicked(post, binding.photoSearch)
             }
+
+            binding.executePendingBindings()
         }
     }
 
@@ -50,9 +53,28 @@ class PostSearchAdapter(
     )
 
     override fun onBindViewHolder(
-        holder: PostSearchAdapter.PostViewHolder,
-        position: Int,
-        model: Post
-    ) = holder.bind(getItem(position), onItemClicked)
+        holder: PostViewHolder,
+        position: Int
+    ) {
+        val post = getItem(position)
 
+        if (post != null) holder.bind(post, onItemClicked)
+    }
+
+    companion object : DiffUtil.ItemCallback<PostSearched>() {
+
+        override fun areItemsTheSame(
+            oldItem: PostSearched,
+            newItem: PostSearched
+        ): Boolean {
+            return oldItem.title == newItem.title
+        }
+
+        override fun areContentsTheSame(
+            oldItem: PostSearched,
+            newItem: PostSearched
+        ): Boolean {
+            return oldItem == newItem
+        }
+    }
 }

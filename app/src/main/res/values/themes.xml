@@ -19,13 +19,11 @@
         <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 
-
     <!-- The theme without ActionBar -->
-    <style name="Theme.Cookies.NoActionBar">
+    <style name="Theme.Cookies.NoActionBar" parent="Theme.Cookies">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
 
         <item name="android:windowContentTransitions">true</item>
