@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@menu/food_menu">
     <item
         android:id="@+id/daily"
         android:title="@string/daily_label" />
     <item
         android:id="@+id/occasions"
-        android:title="@string/occasionss_label" />
+        android:title="@string/occasions_label" />
     <item
         android:id="@+id/easy"
         android:title="@string/easy_label" />

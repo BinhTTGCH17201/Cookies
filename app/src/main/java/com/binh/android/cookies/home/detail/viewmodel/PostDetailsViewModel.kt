@@ -19,12 +19,13 @@ class PostDetailsViewModel(postId: String, application: Application) :
 
     private val postData = databaseRef.child("posts").child(postId)
 
-    var comment: String = ""
+    var commentContent = MutableLiveData<String>()
 
     init {
         postData.get().addOnSuccessListener {
             post.value = it.getValue(Post::class.java)!!
         }
+        commentContent.value = ""
     }
 
     fun submitComment() {
@@ -35,13 +36,13 @@ class PostDetailsViewModel(postId: String, application: Application) :
             pushId!!,
             post.value!!.postId,
             user!!.uid,
-            comment,
+            commentContent.value.toString(),
             0
         )
 
-
         commentRef.setValue(comment).addOnCompleteListener {
             if (it.isSuccessful) Log.d(TAG, "Successful add comment")
+            commentContent.value = ""
         }
     }
 }

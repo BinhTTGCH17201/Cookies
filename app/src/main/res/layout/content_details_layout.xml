@@ -33,6 +33,14 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="@tools:sample/lorem" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/post_title" />
+
             <TextView
                 android:id="@+id/post_ingredient_label"
                 android:layout_width="0dp"
@@ -54,7 +62,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/post_ingredient_label"
                 app:layout_constraintVertical_bias="0.0"
-                tools:text="@tools:sample/lorem/random" />
+                tools:text="@tools:sample/lorem" />
 
             <TextView
                 android:id="@+id/post_ingredient"
@@ -65,7 +73,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/post_time_people"
                 app:layout_constraintVertical_bias="0.0"
-                tools:text="@tools:sample/lorem/random" />
+                tools:text="@tools:sample/lorem" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/post_ingredient" />
 
             <TextView
                 android:id="@+id/post_preparation_label"
@@ -88,7 +104,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/post_preparation_label"
                 app:layout_constraintVertical_bias="0.0"
-                tools:text="@tools:sample/lorem/random" />
+                tools:text="@tools:sample/lorem" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/post_preparation" />
 
             <TextView
                 android:id="@+id/comment_label"
@@ -103,38 +127,51 @@
                 app:layout_constraintTop_toBottomOf="@+id/post_preparation" />
 
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/comment_input_layout"
+            <LinearLayout
+                android:id="@+id/comment_input_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/comment_hint"
+                android:background="@drawable/item_background"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/comment_label">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/comment_input"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/comment_input_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={viewModel.comment}" />
+                    android:hint="@string/comment_hint"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="parent">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/comment_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@={viewModel.commentContent}" />
 
-            <RelativeLayout
-                android:id="@+id/button_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/comment_input_layout">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <Button
+                <RelativeLayout
+                    android:id="@+id/button_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:onClick="@{() -> viewModel.submitComment()}"
-                    android:text="@string/comment_button" />
-            </RelativeLayout>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/comment_input_layout">
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:onClick="@{() -> viewModel.submitComment()}"
+                        android:text="@string/comment_button" />
+                </RelativeLayout>
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/comment_recycler_view"
@@ -144,7 +181,7 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_layout"
+                app:layout_constraintTop_toBottomOf="@+id/comment_input_group"
                 tools:listitem="@layout/item_comment" />
 
 

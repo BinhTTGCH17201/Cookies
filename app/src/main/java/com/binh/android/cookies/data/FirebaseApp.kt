@@ -1,3 +1,5 @@
+@file:Suppress("unused", "unused")
+
 package com.binh.android.cookies.data
 
 import android.app.Application

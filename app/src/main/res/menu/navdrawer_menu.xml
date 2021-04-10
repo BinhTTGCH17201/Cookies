@@ -8,6 +8,7 @@
     <item
         android:id="@+id/addNewPost"
         android:icon="@drawable/ic_add_menu"
+        android:visible="false"
         android:title="@string/new_recipe_menu" />
     <item
         android:id="@+id/accountFragment"

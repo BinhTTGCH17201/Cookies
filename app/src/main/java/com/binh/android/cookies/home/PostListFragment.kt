@@ -26,7 +26,7 @@ class PostListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding: FragmentPostListBinding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_post_list, container, false)
 
@@ -54,24 +54,24 @@ class PostListFragment : Fragment() {
             dataSource.reference.child("posts").orderByChild("type").equalTo("Healthy")
 
 
-        var easyTypeOptions: FirebaseRecyclerOptions<Post> = FirebaseRecyclerOptions.Builder<Post>()
+        val easyTypeOptions: FirebaseRecyclerOptions<Post> = FirebaseRecyclerOptions.Builder<Post>()
             .setQuery(easyQuery, Post::class.java)
             .setLifecycleOwner(viewLifecycleOwner)
             .build()
 
-        var dailyTypeOptions: FirebaseRecyclerOptions<Post> =
+        val dailyTypeOptions: FirebaseRecyclerOptions<Post> =
             FirebaseRecyclerOptions.Builder<Post>()
                 .setQuery(dailyQuery, Post::class.java)
                 .setLifecycleOwner(viewLifecycleOwner)
                 .build()
 
-        var occasionsTypeOptions: FirebaseRecyclerOptions<Post> =
+        val occasionsTypeOptions: FirebaseRecyclerOptions<Post> =
             FirebaseRecyclerOptions.Builder<Post>()
                 .setQuery(occasionsQuery, Post::class.java)
                 .setLifecycleOwner(viewLifecycleOwner)
                 .build()
 
-        var healthyTypeOptions: FirebaseRecyclerOptions<Post> =
+        val healthyTypeOptions: FirebaseRecyclerOptions<Post> =
             FirebaseRecyclerOptions.Builder<Post>()
                 .setQuery(healthyQuery, Post::class.java)
                 .setLifecycleOwner(viewLifecycleOwner)

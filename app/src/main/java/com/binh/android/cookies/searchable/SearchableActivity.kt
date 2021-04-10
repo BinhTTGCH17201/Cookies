@@ -74,6 +74,11 @@ class SearchableActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return super.onSupportNavigateUp()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         connection.clear()

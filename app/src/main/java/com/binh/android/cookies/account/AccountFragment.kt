@@ -7,18 +7,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
 import com.binh.android.cookies.R
 import com.binh.android.cookies.databinding.FragmentAccountBinding
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -37,22 +34,19 @@ class AccountFragment : Fragment() {
 
     private lateinit var accountViewModel: AccountViewModel
 
-    private lateinit var navController: NavController
+    private lateinit var firebaseAuthStateListener: FirebaseAuth.AuthStateListener
+
+    private lateinit var bottomNavView: BottomNavigationView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_account, container, false)
 
         (activity as AppCompatActivity).supportActionBar?.title = "Account"
-
-
-        // testing firebase
-//        val firebaseAuth = FirebaseAuth.getInstance().currentUser
-//        if (firebaseAuth != null) Log.d(TAG, "Photo URL: ${firebaseAuth.displayName}")
 
         // Initialize view model
         val application = requireNotNull(this.activity).application
@@ -66,6 +60,8 @@ class AccountFragment : Fragment() {
 
         binding.lifecycleOwner = this
 
+        bottomNavView = activity?.findViewById(R.id.bottom_navigation)!!
+
         checkUserLoggedIn()
 
         checkUserProfileChanged()
@@ -74,19 +70,19 @@ class AccountFragment : Fragment() {
     }
 
     private fun checkUserProfileChanged() {
-        accountViewModel.isProfileChanged.observe(viewLifecycleOwner, Observer {
+        accountViewModel.isProfileChanged.observe(viewLifecycleOwner, {
             it?.let {
                 when (it) {
                     true -> Snackbar.make(
-                        view?.rootView!!,
+                        bottomNavView,
                         "User profile has been changed!",
                         Snackbar.LENGTH_SHORT
-                    ).show()
+                    ).setAnchorView(bottomNavView).show()
                     false -> Snackbar.make(
-                        view?.rootView!!,
+                        bottomNavView,
                         "Failed to change user profile!",
                         Snackbar.LENGTH_SHORT
-                    ).show()
+                    ).setAnchorView(bottomNavView).show()
                 }
                 accountViewModel.onProfileChangedComplete()
             }
@@ -94,25 +90,38 @@ class AccountFragment : Fragment() {
     }
 
     private fun checkUserLoggedIn() {
-        accountViewModel.isLoggedIn.observe(viewLifecycleOwner, Observer { isLoggedIn ->
-            isLoggedIn?.let {
-                if (isLoggedIn == true) {
-                    accountViewModel.onLoggedIn()
-                    binding.accountImage.setOnClickListener {
-                        setUpImagePicker()
-                    }
-                    binding.loginButton.setOnClickListener {
-                        AuthUI.getInstance().signOut(requireContext())
-                    }
-                } else {
-                    //                    navController.popBackStack()
-                    accountViewModel.onLoggedOut()
-                    binding.loginButton.setOnClickListener {
-                        launchSignInFlow()
-                    }
+        firebaseAuthStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            if (user != null) {
+                accountViewModel.onLoggedIn()
+                binding.accountImage.setOnClickListener {
+                    setUpImagePicker()
+                }
+                binding.loginButton.setOnClickListener {
+                    AuthUI.getInstance().signOut(requireContext())
+                    Snackbar.make(
+                        bottomNavView,
+                        "Successfully signed out!",
+                        Snackbar.LENGTH_SHORT
+                    ).setAnchorView(bottomNavView).show()
+                }
+            } else {
+                accountViewModel.onLoggedOut()
+                binding.loginButton.setOnClickListener {
+                    launchSignInFlow()
                 }
             }
-        })
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener)
     }
 
     private fun launchSignInFlow() {
@@ -134,11 +143,11 @@ class AccountFragment : Fragment() {
         if (requestCode == SIGN_IN_RESULT_CODE) {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode == RESULT_OK) {
-                Log.i(
-                    TAG,
-                    "Successfully signed in user " +
-                            "${FirebaseAuth.getInstance().currentUser?.displayName}!"
-                )
+                Snackbar.make(
+                    bottomNavView,
+                    "Successfully signed in user " + "${FirebaseAuth.getInstance().currentUser?.email}!",
+                    Snackbar.LENGTH_SHORT
+                ).setAnchorView(bottomNavView).show()
                 accountViewModel.onLoggedIn()
             } else {
                 Log.i(TAG, "Sign in unsuccessful ${response?.error?.errorCode}")
@@ -149,37 +158,6 @@ class AccountFragment : Fragment() {
                 accountViewModel.updateProfileImagePreview(selectedPhoto)
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        navController = findNavController()
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            navController.popBackStack(R.id.accountFragment, false)
-        }
-
-        accountViewModel.authenticationState.observe(
-            viewLifecycleOwner,
-            Observer { authenticationState ->
-                when (authenticationState) {
-                    AccountViewModel.AuthenticationState.AUTHENTICATED -> {
-                        accountViewModel.userLoggedIn()
-                    }
-                    AccountViewModel.AuthenticationState.UNAUTHENTICATED -> {
-                        accountViewModel.userLoggedOut()
-                    }
-                    AccountViewModel.AuthenticationState.INVALID_AUTHENTICATION -> Snackbar.make(
-                        view, requireActivity().getString(R.string.login_unsuccessful_msg),
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                    else -> Log.i(
-                        TAG,
-                        "Authentication state that doesn't require any UI change $authenticationState"
-                    )
-                }
-            })
     }
 
     private fun setUpImagePicker() {

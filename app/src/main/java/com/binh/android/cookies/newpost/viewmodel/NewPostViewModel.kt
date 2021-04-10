@@ -3,6 +3,7 @@ package com.binh.android.cookies.newpost.viewmodel
 import android.app.Application
 import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,8 +14,11 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 private const val TAG = "NewPostViewModel"
 
@@ -28,15 +32,23 @@ class NewPostViewModel(application: Application) :
     val onUpload: LiveData<Boolean?>
         get() = _onUpload
 
+    private val _onUploadImage = MutableLiveData<Boolean?>()
+    val onUploadImage: LiveData<Boolean?>
+        get() = _onUploadImage
+
     private val _uploadSuccess = MutableLiveData<Boolean?>()
     val uploadSuccess: LiveData<Boolean?>
         get() = _uploadSuccess
+
+    private val _deletedPost = MutableLiveData<Boolean?>()
+    val deletedPost: LiveData<Boolean?>
+        get() = _deletedPost
 
     var title = MutableLiveData<String?>()
 
     var ingredient = MutableLiveData<String?>()
 
-    var people = MutableLiveData<String>()
+    var people = MutableLiveData<String?>()
 
     var time = MutableLiveData<String?>()
 
@@ -48,7 +60,13 @@ class NewPostViewModel(application: Application) :
     val photoUrl
         get() = _photoUrl
 
+    private val _uploadProgress = MutableLiveData<Int>()
+    val uploadProgress
+        get() = _uploadProgress
+
     init {
+        _deletedPost.value = null
+        uploadProgress.value = 0
         title.value = null
         type.value = null
         preparation.value = null
@@ -70,45 +88,84 @@ class NewPostViewModel(application: Application) :
         val newPost = database.child("posts").push()
         val pushId = newPost.key
         viewModelScope.launch {
-            uploadProfileImage(pushId!!, newPost)
+            pushId?.let {
+                val uploadImage = async { uploadProfileImage(pushId) }
+                val addNewPost = async { pushNewPost(pushId, uploadImage.await(), newPost, false) }
+
+                addNewPost.await()
+            }
         }
     }
 
-    private suspend fun uploadProfileImage(pushId: String, newPost: DatabaseReference) {
-        withContext(Dispatchers.IO) {
-            val imageRef = storage.child("/posts").child(pushId)
-            val uploadTask = imageRef.putFile(_photoUrl.value!!)
-
-            uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let {
-                        Log.e(TAG, "File failed to upload!", it)
-                    }
-                }
-                imageRef.downloadUrl
-            }.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val downloadUri = task.result
-
-                    val post = Post(
-                        pushId,
-                        title.value.toString(),
-                        user?.displayName.toString(),
-                        ingredient.value.toString(),
-                        people.value!!.toInt(),
-                        time.value!!.toInt(),
-                        type.value.toString(),
-                        preparation.value.toString(),
-                        downloadUri.toString(),
-                        0
-                    )
-                    pushNewPost(post, newPost)
-
-                } else {
-                    _onUpload.value = null
-                    _uploadSuccess.value = false
+    fun getPost(postId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            database.child("posts").child(postId).get().addOnSuccessListener { snapshot ->
+                val post = snapshot.getValue(Post::class.java)
+                post?.let {
+                    title.postValue(post.title)
+                    type.postValue(post.type)
+                    preparation.postValue(post.preparation)
+                    ingredient.postValue(post.ingredient)
+                    people.postValue(post.people.toString())
+                    _photoUrl.postValue(post.photoUrl.toUri())
+                    time.postValue(post.time.toString())
                 }
             }
+        }
+    }
+
+    fun deletePost(postId: String) {
+        database.child("posts").child(postId).removeValue()
+        _deletedPost.value = true
+        _deletedPost.value = null
+    }
+
+    fun editPost(postId: String) {
+        _onUpload.value = true
+        val newPost = database.child("posts").child(postId)
+        viewModelScope.launch {
+            async {
+                newPost.get().addOnSuccessListener { snapshot ->
+                    val post = snapshot.getValue(Post::class.java)
+                    viewModelScope.launch(Dispatchers.IO) {
+                        if (post?.photoUrl == _photoUrl.value.toString()) {
+                            val addNewPost =
+                                async { pushNewPost(postId, post.photoUrl, newPost, true) }
+                            addNewPost.await()
+                        } else {
+                            val uploadImage = async { uploadProfileImage(postId) }
+                            val addNewPost = async {
+                                pushNewPost(
+                                    postId,
+                                    uploadImage.await(),
+                                    newPost,
+                                    true
+                                )
+                            }
+                            addNewPost.await()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun uploadProfileImage(pushId: String): String {
+        return withContext(Dispatchers.IO) {
+            _onUploadImage.postValue(true)
+            storage.child("posts").child(pushId).putFile(_photoUrl.value!!)
+                .addOnProgressListener { task ->
+                    val progress = (100.0 * task.bytesTransferred) / task.totalByteCount
+                    _uploadProgress.value = progress.roundToInt()
+                }
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) _onUploadImage.value = false
+                }
+                .await()
+                .storage
+                .downloadUrl
+                .await()
+                .toString()
         }
     }
 
@@ -124,7 +181,30 @@ class NewPostViewModel(application: Application) :
         time.value = null
     }
 
-    private fun pushNewPost(post: Post, newPost: DatabaseReference) {
+    private fun pushNewPost(
+        pushId: String,
+        photoUri: String,
+        newPost: DatabaseReference,
+        updatePost: Boolean
+    ) {
+        if (time.value.isNullOrBlank()) time.value = "0"
+
+
+        if (people.value.isNullOrBlank()) people.value = "0"
+
+        val post = Post(
+            pushId,
+            title.value.toString(),
+            user?.displayName.toString(),
+            ingredient.value.toString(),
+            people.value!!.toInt(),
+            time.value!!.toInt(),
+            type.value.toString(),
+            preparation.value.toString(),
+            photoUri,
+            0
+        )
+
         newPost.setValue(post).addOnCompleteListener {
             if (it.isSuccessful) {
                 _onUpload.value = null
@@ -134,6 +214,11 @@ class NewPostViewModel(application: Application) :
                 _uploadSuccess.value = false
             }
         }
-        onUploadComplete()
+        if (!updatePost) {
+            viewModelScope.launch(Dispatchers.Main) {
+                onUploadComplete()
+            }
+        }
+
     }
 }

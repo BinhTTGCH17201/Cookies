@@ -6,11 +6,25 @@
     <fragment
         android:id="@+id/addNewPost"
         android:name="com.binh.android.cookies.newpost.AddNewPostFragment"
-        android:label="Add new recipe" />
+        android:label="Add new recipe">
+        <argument
+            android:name="editPost"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="postId"
+            android:defaultValue="null"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
     <fragment
         android:id="@+id/postList"
         android:name="com.binh.android.cookies.home.PostListFragment"
-        android:label="Recipes" />
+        android:label="Recipes">
+        <action
+            android:id="@+id/action_postList_to_addNewPost"
+            app:destination="@id/addNewPost" />
+    </fragment>
     <fragment
         android:id="@+id/accountFragment"
         android:name="com.binh.android.cookies.account.AccountFragment"

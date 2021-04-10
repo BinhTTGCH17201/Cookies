@@ -12,13 +12,25 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/add_new_recipe_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:context=".newpost.AddNewPostFragment">
             <!-- Title Input  -->
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress_bar_add"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/post_title_label"
@@ -46,8 +58,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/food_type_label"
-                app:layout_constraintEnd_toEndOf="@+id/post_title_label"
-                app:layout_constraintStart_toStartOf="@+id/post_title_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/post_title_label">
 
                 <AutoCompleteTextView
@@ -66,8 +78,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/ingredient_label"
-                app:layout_constraintEnd_toEndOf="@+id/food_type"
-                app:layout_constraintStart_toStartOf="@+id/food_type"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/food_type">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -88,8 +100,8 @@
                 android:layout_height="wrap_content"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="@id/post_ingredient_label"
-                app:layout_constraintStart_toStartOf="@id/post_ingredient_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/post_ingredient_label">
                 <!--        People eat Input-->
                 <com.google.android.material.textfield.TextInputLayout
@@ -139,8 +151,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/preparation_label"
-                app:layout_constraintEnd_toEndOf="@+id/people_time_input"
-                app:layout_constraintStart_toStartOf="@+id/people_time_input"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/people_time_input">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -155,29 +167,64 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!--        Image picker-->
+            <!-- Image picker-->
             <ImageView
                 android:id="@+id/post_photo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:contentDescription="@string/post_preview_image_desc"
-                app:layout_constraintEnd_toEndOf="@id/post_preparation_label"
-                app:layout_constraintStart_toStartOf="@id/post_preparation_label"
-                app:layout_constraintTop_toBottomOf="@id/post_preparation_label"
-                app:postImageUrl="@{viewModel.photoUrl}"
-                app:srcCompat="@drawable/choose_image_placeholder" />
-
-            <Button
-                android:id="@+id/submit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="250dp"
+                android:layout_marginStart="30dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_new_post_button_text"
+                android:layout_marginEnd="30dp"
+                android:contentDescription="@string/post_preview_image_desc"
+                android:cropToPadding="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/post_preparation_label"
+                app:postImageUrl="@{viewModel.photoUrl}"
+                app:srcCompat="@drawable/choose_image_placeholder">
+
+            </ImageView>
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/uploadProgressIndicator"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@id/post_photo"
+                app:layout_constraintStart_toStartOf="@id/post_photo"
                 app:layout_constraintTop_toBottomOf="@id/post_photo" />
 
+            <LinearLayout
+                android:id="@+id/button_edit_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/post_photo">
+
+                <Button
+                    android:id="@+id/submit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="0.5"
+                    android:gravity="center"
+                    android:padding="4dp"
+                    android:text="@string/add_new_post_button_text" />
+
+                <Button
+                    android:id="@+id/delete_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="0.5"
+                    android:gravity="center"
+                    android:text="@string/delete_recipe_button_text"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

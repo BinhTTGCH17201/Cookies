@@ -46,6 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_gravity="bottom"
+            app:layout_dodgeInsetEdges="bottom"
             app:menu="@menu/navdrawer_menu" />
 
     </RelativeLayout>

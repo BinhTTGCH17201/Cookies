@@ -16,7 +16,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions
 
 
 class PostListAdapter(
-    private val options: FirebaseRecyclerOptions<Post>,
+    options: FirebaseRecyclerOptions<Post>,
     private val onItemClicked: (Post, ImageView) -> Unit
 ) :
     FirebaseRecyclerAdapter<Post, PostListAdapter.PostViewHolder>(options) {

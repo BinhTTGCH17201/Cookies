@@ -7,8 +7,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.binh.android.cookies.R
+import com.binh.android.cookies.data.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,7 +22,7 @@ private const val TAG = "AccountViewModel"
 class AccountViewModel(application: Application) :
     AndroidViewModel(application) {
 
-    private val user = FirebaseAuth.getInstance().currentUser
+    private var user = FirebaseAuth.getInstance().currentUser
     private val userStorage =
         FirebaseStorage.getInstance().reference.child("/userProfileImage")
 
@@ -31,15 +34,10 @@ class AccountViewModel(application: Application) :
     val buttonText: LiveData<String>
         get() = _buttonText
 
-    private val _isLoggedIn = MutableLiveData<Boolean>()
-    val isLoggedIn: LiveData<Boolean>
-        get() = _isLoggedIn
-
-    private val _isProfileChanged = MutableLiveData<Boolean>()
-    val isProfileChanged: LiveData<Boolean>
+    private val _isProfileChanged = MutableLiveData<Boolean?>()
+    val isProfileChanged: LiveData<Boolean?>
         get() = _isProfileChanged
 
-    //    var name = ""
     val name = MutableLiveData<String?>()
 
     var email = MutableLiveData<String?>()
@@ -52,14 +50,6 @@ class AccountViewModel(application: Application) :
     val photoUrl: LiveData<Uri?>
         get() = _photoUrl
 
-    enum class AuthenticationState {
-        AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
-    }
-
-    private val _authenticationState = MutableLiveData<AuthenticationState>()
-    val authenticationState: LiveData<AuthenticationState>
-        get() = _authenticationState
-
     init {
         _uiVisible.value = true
         user?.let {
@@ -69,28 +59,9 @@ class AccountViewModel(application: Application) :
             rePassword.value = ""
             _uiVisible.value = false
             _buttonText.value = "Sign In"
-            _isLoggedIn.value = false
-            _photoUrl.value = user.photoUrl
+            _photoUrl.value = user?.photoUrl
             _isProfileChanged.value = null
         }
-
-        // Add authentication listener
-        val authenticationStateListener = FirebaseAuth.AuthStateListener { user ->
-            if (user.currentUser != null) {
-                _authenticationState.value = AuthenticationState.AUTHENTICATED
-            } else {
-                _authenticationState.value = AuthenticationState.UNAUTHENTICATED
-            }
-        }
-        FirebaseAuth.getInstance().addAuthStateListener(authenticationStateListener)
-    }
-
-    fun userLoggedIn() {
-        _isLoggedIn.value = true
-    }
-
-    fun userLoggedOut() {
-        _isLoggedIn.value = false
     }
 
     private fun onBindingUserSignedInProfile() {
@@ -98,7 +69,6 @@ class AccountViewModel(application: Application) :
             name.value = it.displayName!!
             email.value = it.email!!
             _photoUrl.value = it.photoUrl
-            Log.d(TAG, "Successfully change var for binding")
         }
     }
 
@@ -107,24 +77,41 @@ class AccountViewModel(application: Application) :
             name.value = ""
             email.value = ""
             _photoUrl.value = null
-            Log.d(TAG, "Successfully change var for binding")
         }
     }
 
     fun onLoggedOut() {
         viewModelScope.launch {
             _uiVisible.value = false
-            _buttonText.value = "Sign In"
+            _buttonText.value =
+                getApplication<Application>().resources.getString(R.string.login_button_text)
             onBindingUserSignedOutProfile()
         }
     }
 
     fun onLoggedIn() {
         viewModelScope.launch {
+
             user?.reload()
+            user = FirebaseAuth.getInstance().currentUser
             _uiVisible.value = true
-            _buttonText.value = "Sign Out"
+            _buttonText.value =
+                getApplication<Application>().resources.getString(R.string.logout_button_text)
             onBindingUserSignedInProfile()
+            val userDb: User = if (user?.photoUrl != null) {
+                User(
+                    user.displayName,
+                    user?.photoUrl.toString(),
+                    false
+                )
+            } else {
+                User(
+                    user.displayName,
+                    "https://firebasestorage.googleapis.com/v0/b/cooking-forum.appspot.com/o/userProfileImage%2Fuser_profile_placeholder.png?alt=media&token=bc97706a-2a5c-4365-a9e7-d48ed8602b45",
+                    false
+                )
+            }
+            FirebaseDatabase.getInstance().reference.child("users/${user.uid}}").setValue(userDb)
         }
     }
 
@@ -132,23 +119,23 @@ class AccountViewModel(application: Application) :
         viewModelScope.launch(Dispatchers.IO) {
             user?.let {
                 if (password.value != "" && rePassword.value != "") if (password.value == rePassword.value) {
-                    it.updatePassword(password.value.toString()).addOnCompleteListener {
-                        if (it.isSuccessful) {
+                    it.updatePassword(password.value.toString()).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
                             _isProfileChanged.value = true
                         }
                     }
                     val newUserProfile = UserProfileChangeRequest.Builder()
                         .setDisplayName(name.value)
                         .build()
-                    it.updateProfile(newUserProfile).addOnCompleteListener {
-                        if (it.isSuccessful) {
+                    it.updateProfile(newUserProfile).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
                             _isProfileChanged.value = true
                         }
                     }
-                    if (user.photoUrl != photoUrl.value) uploadProfileImage()
+                    if (user?.photoUrl != photoUrl.value) uploadProfileImage()
 
-                    it.updateEmail(email.value.toString()).addOnCompleteListener {
-                        if (it.isSuccessful) {
+                    it.updateEmail(email.value.toString()).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
                             _isProfileChanged.value = true
                         }
                     }
