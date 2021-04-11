@@ -15,6 +15,10 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class CommentAdapter(options: FirebaseRecyclerOptions<Comment>) :
     FirebaseRecyclerAdapter<Comment, CommentAdapter.CommentViewHolder>(options) {
@@ -25,7 +29,9 @@ class CommentAdapter(options: FirebaseRecyclerOptions<Comment>) :
         fun bind(comment: Comment) {
             getUserName(comment.userId)
             binding.comment.text = comment.content
-            checkCommentOwner(comment)
+            GlobalScope.launch(Dispatchers.Main) {
+                checkCommentOwner(comment)
+            }
         }
 
         private fun getUserName(uid: String) {
@@ -44,9 +50,13 @@ class CommentAdapter(options: FirebaseRecyclerOptions<Comment>) :
                 }
         }
 
-        private fun checkCommentOwner(comment: Comment) {
+        private suspend fun checkCommentOwner(comment: Comment) {
             val currentUid = FirebaseAuth.getInstance().currentUser?.uid
-            if (currentUid == comment.userId) {
+            val pathStringDb = "users/${currentUid}/admin"
+            val isAdmin = FirebaseDatabase.getInstance().reference.child(pathStringDb)
+                .get().await().getValue(Boolean::class.java) ?: false
+
+            if (currentUid == comment.userId || isAdmin) {
                 binding.deleteComment.visibility = View.VISIBLE
                 binding.deleteComment.setOnClickListener { view ->
                     FirebaseDatabase.getInstance().reference.child("comments/${comment.commentId}")
@@ -67,6 +77,10 @@ class CommentAdapter(options: FirebaseRecyclerOptions<Comment>) :
             ItemCommentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
 
-    override fun onBindViewHolder(holder: CommentViewHolder, position: Int, model: Comment) =
+    override fun onBindViewHolder(
+        holder: CommentViewHolder,
+        position: Int,
+        model: Comment
+    ) =
         holder.bind(getItem(position))
 }

@@ -33,6 +33,7 @@ class SearchableActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbarSearch)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "Search recipe"
 
         val viewModelFactory = PostSearchViewModelFactory(application)
 

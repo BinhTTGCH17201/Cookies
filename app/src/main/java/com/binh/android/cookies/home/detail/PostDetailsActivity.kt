@@ -39,8 +39,6 @@ class PostDetailsActivity : AppCompatActivity() {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_post_details)
 
-        val dataSource = FirebaseDatabase.getInstance().reference
-
         binding.lifecycleOwner = this
 
         val viewModelFactory =
@@ -51,14 +49,25 @@ class PostDetailsActivity : AppCompatActivity() {
 
         binding.postContent.viewModel = postDetailsViewModel
 
-        binding.toolbar.title = ""
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setUpToolbar()
 
         bind()
 
         checkAuth()
 
+        setUpComments()
+
+        setUpObserver()
+
+    }
+
+    private fun setUpToolbar() {
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    private fun setUpComments() {
+        val dataSource = FirebaseDatabase.getInstance().reference
         val commentQuery = dataSource.child("comments").orderByChild("postId")
             .equalTo(intent.extras?.getString(KEY_POST_ID)!!)
 
@@ -71,6 +80,16 @@ class PostDetailsActivity : AppCompatActivity() {
         val commentAdapter = CommentAdapter(commentOptions)
 
         binding.postContent.commentRecyclerView.adapter = commentAdapter
+    }
+
+    private fun setUpObserver() {
+        postDetailsViewModel.thisPostLiked.observe(this, {
+            when (it) {
+                true -> binding.toolbar.menu.findItem(R.id.action_like).setIcon(R.drawable.ic_like)
+                false -> binding.toolbar.menu.findItem(R.id.action_like)
+                    .setIcon(R.drawable.ic_unlike)
+            }
+        })
     }
 
     override fun onStart() {
@@ -156,6 +175,17 @@ class PostDetailsActivity : AppCompatActivity() {
             R.id.action_update -> {
                 onItemClicked(intent.extras?.getString(KEY_POST_ID)!!)
             }
+            R.id.action_like -> {
+                when (postDetailsViewModel.thisPostLiked.value) {
+                    true -> postDetailsViewModel.postUnlike()
+                    false -> postDetailsViewModel.postLiked()
+                    else -> Toast.makeText(
+                        applicationContext,
+                        "Something went wrong!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
 
         return super.onOptionsItemSelected(item)
@@ -179,6 +209,7 @@ class PostDetailsActivity : AppCompatActivity() {
 
                 val intent = Intent(this, MainActivity::class.java).putExtra("EDIT_POST_ID", postId)
                     .putExtra("EDIT_POST", true)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
             }
         }

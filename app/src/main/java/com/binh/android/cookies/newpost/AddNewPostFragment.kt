@@ -58,6 +58,16 @@ class AddNewPostFragment : Fragment() {
 
         binding.viewModel = newPostViewModel
 
+        initFragment()
+
+        setUpFoodTypeMenu()
+
+        uploadProgressBar = binding.uploadProgressIndicator
+
+        return binding.root
+    }
+
+    private fun initFragment() {
         if (args.editPost) {
             (activity as AppCompatActivity).supportActionBar?.title =
                 getString(R.string.edit_recipe_label)
@@ -83,13 +93,6 @@ class AddNewPostFragment : Fragment() {
         }
 
         progressBar = binding.progressBarAdd
-
-
-        setUpFoodTypeMenu()
-
-        uploadProgressBar = binding.uploadProgressIndicator
-
-        return binding.root
     }
 
     private fun thisAddNewRecipe() {

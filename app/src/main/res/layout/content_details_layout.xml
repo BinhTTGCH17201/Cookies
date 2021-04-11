@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="viewModel"
             type="com.binh.android.cookies.home.detail.viewmodel.PostDetailsViewModel" />
@@ -20,6 +19,7 @@
             android:layout_height="match_parent"
             android:padding="16dp">
 
+
             <TextView
                 android:id="@+id/post_title"
                 style="@style/ThemeOverlay.MaterialComponents"
@@ -27,6 +27,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="32sp"
                 android:textStyle="bold"
+                android:text="@{viewModel.post.title}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -34,12 +35,40 @@
                 tools:text="@tools:sample/lorem" />
 
             <LinearLayout
+                android:id="@id/like_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/post_title">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.05"
+                    android:gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_unlike" />
+
+                <TextView
+                    android:id="@+id/like_number_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|start"
+                    android:layout_weight="0.6"
+                    android:text="@{@string/like_label(viewModel.likeNumber)}"
+                    android:textSize="16sp"
+                    tools:text="@tools:sample/lorem" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@android:color/darker_gray"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/post_title" />
+                app:layout_constraintTop_toBottomOf="@+id/like_layout" />
 
             <TextView
                 android:id="@+id/post_ingredient_label"
@@ -51,11 +80,12 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/post_title" />
+                app:layout_constraintTop_toBottomOf="@id/like_layout" />
 
             <TextView
                 android:id="@+id/post_time_people"
                 android:layout_width="0dp"
+                android:text="@{String.format(@string/time_people_text, viewModel.post.people, viewModel.post.time)}"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -73,6 +103,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/post_time_people"
                 app:layout_constraintVertical_bias="0.0"
+                android:text="@{viewModel.post.ingredient}"
                 tools:text="@tools:sample/lorem" />
 
             <LinearLayout
@@ -102,6 +133,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                android:text="@{viewModel.post.preparation}"
                 app:layout_constraintTop_toBottomOf="@+id/post_preparation_label"
                 app:layout_constraintVertical_bias="0.0"
                 tools:text="@tools:sample/lorem" />

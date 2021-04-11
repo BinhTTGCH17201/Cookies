@@ -3,15 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <item
+        android:id="@+id/action_like"
+        android:icon="@drawable/ic_unlike"
+        android:title="@string/like_action_label"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share"
+        android:title="@string/share_action_label"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_update"
         android:icon="@drawable/ic_edit"
         android:title="@string/update_action_label"
         android:visible="false"
         app:showAsAction="ifRoom"
         tools:visible="true" />
-    <item
-        android:id="@+id/action_share"
-        android:icon="@drawable/ic_share"
-        android:title="@string/share_action_label"
-        app:showAsAction="always" />
 </menu>

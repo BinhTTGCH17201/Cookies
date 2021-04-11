@@ -18,6 +18,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        const val TAG = "MainActivity"
+    }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var firebaseAuthStateListener: FirebaseAuth.AuthStateListener
@@ -46,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         } else Log.d("EDIT_POST", "This post will not be edit!")
+
 
         showAddNav()
     }
@@ -90,8 +94,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onStop() {
+        super.onStop()
         FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener)
     }
 }

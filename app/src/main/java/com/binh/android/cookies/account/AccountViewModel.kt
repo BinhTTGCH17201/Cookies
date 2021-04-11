@@ -11,13 +11,11 @@ import com.binh.android.cookies.R
 import com.binh.android.cookies.data.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 private const val TAG = "AccountViewModel"
@@ -26,6 +24,7 @@ class AccountViewModel(application: Application) :
     AndroidViewModel(application) {
 
     private var user = FirebaseAuth.getInstance().currentUser
+    private val userDb = FirebaseDatabase.getInstance().reference.child("users")
     private val userStorage =
         FirebaseStorage.getInstance().reference.child("/userProfileImage")
 
@@ -93,62 +92,32 @@ class AccountViewModel(application: Application) :
         }
     }
 
+    @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     fun onLoggedIn() {
         viewModelScope.launch {
-
             user?.reload()
             user = FirebaseAuth.getInstance().currentUser
             _uiVisible.value = true
             _buttonText.value =
                 getApplication<Application>().resources.getString(R.string.logout_button_text)
-            val listenerForSingleValueEvent = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        val userAuth = snapshot.getValue(User::class.java)
-                        Log.d("AccountViewModel", "Admin: " + userAuth?.admin)
-                        if (userAuth?.admin!! == false) {
-                            val userDb: User = if (user?.photoUrl != null) {
-                                User(
-                                    user?.displayName!!,
-                                    user?.photoUrl.toString(),
-                                    false
-                                )
-                            } else {
-                                User(
-                                    user?.displayName!!,
-                                    "https://firebasestorage.googleapis.com/v0/b/cooking-forum.appspot.com/o/userProfileImage%2Fuser_profile_placeholder.png?alt=media&token=bc97706a-2a5c-4365-a9e7-d48ed8602b45",
-                                    false
-                                )
-                            }
-                            FirebaseDatabase.getInstance().reference.child("users/${user?.uid}")
-                                .setValue(userDb)
-                        } else if (userAuth.admin == true) {
-                            val userDb: User = if (user?.photoUrl != null) {
-                                User(
-                                    user?.displayName!!,
-                                    user?.photoUrl.toString(),
-                                    true
-                                )
-                            } else {
-                                User(
-                                    user?.displayName!!,
-                                    "https://firebasestorage.googleapis.com/v0/b/cooking-forum.appspot.com/o/userProfileImage%2Fuser_profile_placeholder.png?alt=media&token=bc97706a-2a5c-4365-a9e7-d48ed8602b45",
-                                    true
-                                )
-                            }
-                            FirebaseDatabase.getInstance().reference.child("users/${user?.uid}")
-                                .setValue(userDb)
-                        }
-                    }
-                    onBindingUserSignedInProfile()
+            user?.let {
+                val userAdmin = userDb.child(user.uid).get().await().exists()
+                if (userAdmin) {
+                    val admin = userDb.child("${user.uid}/admin").get().await()
+                        .getValue(Boolean::class.java) ?: false
+                    saveUserInfoToDb(admin)
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("AccountViewModel", "Fail to save user info!!!")
-                }
+            } ?: run {
+                Log.e(TAG, "Error to get user data!")
             }
-            FirebaseDatabase.getInstance().reference.child("users/${user?.uid}")
-                .addListenerForSingleValueEvent(listenerForSingleValueEvent)
+            onBindingUserSignedInProfile()
+        }
+    }
+
+    private suspend fun saveUserInfoToDb(isAdmin: Boolean) {
+        withContext(Dispatchers.IO) {
+            val newUserInfo = User(user?.displayName!!, user?.photoUrl.toString(), isAdmin)
+            user?.uid?.let { userDb.child(it).setValue(newUserInfo) }
         }
     }
 

@@ -119,8 +119,8 @@ class AccountFragment : Fragment() {
         FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onStop() {
+        super.onStop()
         FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener)
     }
 

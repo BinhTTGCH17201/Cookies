@@ -9,7 +9,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.binh.android.cookies.data.Post
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -26,7 +25,6 @@ private const val TAG = "NewPostViewModel"
 class NewPostViewModel(application: Application) :
     AndroidViewModel(application) {
     private val database = FirebaseDatabase.getInstance().reference
-    private val user = FirebaseAuth.getInstance().currentUser
     private val storage = FirebaseStorage.getInstance().reference
 
     private val _onUpload = MutableLiveData<Boolean?>()
@@ -117,18 +115,19 @@ class NewPostViewModel(application: Application) :
 
     fun deletePost(postId: String) {
         _onUpload.value = true
-        val deletingPostRef = database.child("posts").child(postId)
-        deletingPostRef.get().addOnSuccessListener {
-            if (it.exists()) {
-                val post = it.getValue(Post::class.java)
-                val imageRef: StorageReference =
-                    FirebaseStorage.getInstance().getReferenceFromUrl(post?.photoUrl!!)
-                imageRef.delete().addOnSuccessListener {
-                    database.child("posts").child(postId).removeValue().addOnSuccessListener {
-                        Log.d("EditViewModel", "Post delete successfully!")
-                        _deletedPost.value = true
-                        _deletedPost.value = null
-                        _onUpload.postValue(null)
+        viewModelScope.launch(Dispatchers.IO) {
+            val deletingPostRef = database.child("posts").child(postId)
+            deletingPostRef.get().addOnSuccessListener {
+                if (it.exists()) {
+                    val post = it.getValue(Post::class.java)
+                    val imageRef: StorageReference =
+                        FirebaseStorage.getInstance().getReferenceFromUrl(post?.photoUrl!!)
+                    imageRef.delete().addOnSuccessListener {
+                        database.child("posts").child(postId).removeValue().addOnSuccessListener {
+                            _deletedPost.value = true
+                            _deletedPost.value = null
+                            _onUpload.postValue(null)
+                        }
                     }
                 }
             }
@@ -138,29 +137,23 @@ class NewPostViewModel(application: Application) :
     fun editPost(postId: String) {
         _onUpload.value = true
         val newPost = database.child("posts").child(postId)
-        viewModelScope.launch {
-            async {
-                newPost.get().addOnSuccessListener { snapshot ->
-                    val post = snapshot.getValue(Post::class.java)
-                    viewModelScope.launch(Dispatchers.IO) {
-                        if (post?.photoUrl == _photoUrl.value.toString()) {
-                            val addNewPost =
-                                async { pushNewPost(postId, post.photoUrl, newPost, true) }
-                            addNewPost.await()
-                        } else {
-                            val uploadImage = async { uploadProfileImage(postId) }
-                            val addNewPost = async {
-                                pushNewPost(
-                                    postId,
-                                    uploadImage.await(),
-                                    newPost,
-                                    true
-                                )
-                            }
-                            addNewPost.await()
-                        }
-                    }
+        viewModelScope.launch(Dispatchers.IO) {
+            val post = newPost.get().await().getValue(Post::class.java)
+            if (post?.photoUrl == _photoUrl.value.toString()) {
+                val addNewPost =
+                    async { pushNewPost(postId, post.photoUrl, newPost, true) }
+                addNewPost.await()
+            } else {
+                val uploadImage = async { uploadProfileImage(postId) }
+                val addNewPost = async {
+                    pushNewPost(
+                        postId,
+                        uploadImage.await(),
+                        newPost,
+                        true
+                    )
                 }
+                addNewPost.await()
             }
         }
     }
