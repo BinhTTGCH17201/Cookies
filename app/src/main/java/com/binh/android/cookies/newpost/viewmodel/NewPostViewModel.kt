@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -115,9 +116,23 @@ class NewPostViewModel(application: Application) :
     }
 
     fun deletePost(postId: String) {
-        database.child("posts").child(postId).removeValue()
-        _deletedPost.value = true
-        _deletedPost.value = null
+        _onUpload.value = true
+        val deletingPostRef = database.child("posts").child(postId)
+        deletingPostRef.get().addOnSuccessListener {
+            if (it.exists()) {
+                val post = it.getValue(Post::class.java)
+                val imageRef: StorageReference =
+                    FirebaseStorage.getInstance().getReferenceFromUrl(post?.photoUrl!!)
+                imageRef.delete().addOnSuccessListener {
+                    database.child("posts").child(postId).removeValue().addOnSuccessListener {
+                        Log.d("EditViewModel", "Post delete successfully!")
+                        _deletedPost.value = true
+                        _deletedPost.value = null
+                        _onUpload.postValue(null)
+                    }
+                }
+            }
+        }
     }
 
     fun editPost(postId: String) {
@@ -195,7 +210,6 @@ class NewPostViewModel(application: Application) :
         val post = Post(
             pushId,
             title.value.toString(),
-            user?.displayName.toString(),
             ingredient.value.toString(),
             people.value!!.toInt(),
             time.value!!.toInt(),

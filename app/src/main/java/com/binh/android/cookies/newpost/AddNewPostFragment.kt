@@ -136,16 +136,18 @@ class AddNewPostFragment : Fragment() {
 
         newPostViewModel.deletedPost.observe(viewLifecycleOwner, {
             when (it) {
-                true -> Snackbar.make(
-                    bottomNavView,
-                    "Successfully delete post!",
-                    Snackbar.LENGTH_SHORT
-                ).setAnchorView(bottomNavView).show()
+                true -> {
+                    Snackbar.make(
+                        bottomNavView,
+                        "Successfully delete post!",
+                        Snackbar.LENGTH_SHORT
+                    ).setAnchorView(bottomNavView).show()
+                    view?.findNavController()?.navigate(R.id.postList)
+                }
             }
         })
         binding.deleteButton.setOnClickListener {
             newPostViewModel.deletePost(postId)
-            view?.findNavController()?.navigate(R.id.postList)
         }
 
         newPostViewModel.onUpload.observe(viewLifecycleOwner, {

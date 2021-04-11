@@ -4,7 +4,6 @@ package com.binh.android.cookies.data
 data class Post(
     val postId: String = "",
     val title: String = "",
-    val author: String = "",
     val ingredient: String = "",
     val people: Int = 0,
     val time: Int = 0,

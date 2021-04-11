@@ -11,7 +11,10 @@ import com.binh.android.cookies.R
 import com.binh.android.cookies.data.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -74,6 +77,7 @@ class AccountViewModel(application: Application) :
 
     private fun onBindingUserSignedOutProfile() {
         user?.let {
+            Log.d("User", "User login with UID: ${user?.uid}")
             name.value = ""
             email.value = ""
             _photoUrl.value = null
@@ -97,21 +101,54 @@ class AccountViewModel(application: Application) :
             _uiVisible.value = true
             _buttonText.value =
                 getApplication<Application>().resources.getString(R.string.logout_button_text)
-            onBindingUserSignedInProfile()
-            val userDb: User = if (user?.photoUrl != null) {
-                User(
-                    user.displayName,
-                    user?.photoUrl.toString(),
-                    false
-                )
-            } else {
-                User(
-                    user.displayName,
-                    "https://firebasestorage.googleapis.com/v0/b/cooking-forum.appspot.com/o/userProfileImage%2Fuser_profile_placeholder.png?alt=media&token=bc97706a-2a5c-4365-a9e7-d48ed8602b45",
-                    false
-                )
+            val listenerForSingleValueEvent = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val userAuth = snapshot.getValue(User::class.java)
+                        Log.d("AccountViewModel", "Admin: " + userAuth?.admin)
+                        if (userAuth?.admin!! == false) {
+                            val userDb: User = if (user?.photoUrl != null) {
+                                User(
+                                    user?.displayName!!,
+                                    user?.photoUrl.toString(),
+                                    false
+                                )
+                            } else {
+                                User(
+                                    user?.displayName!!,
+                                    "https://firebasestorage.googleapis.com/v0/b/cooking-forum.appspot.com/o/userProfileImage%2Fuser_profile_placeholder.png?alt=media&token=bc97706a-2a5c-4365-a9e7-d48ed8602b45",
+                                    false
+                                )
+                            }
+                            FirebaseDatabase.getInstance().reference.child("users/${user?.uid}")
+                                .setValue(userDb)
+                        } else if (userAuth.admin == true) {
+                            val userDb: User = if (user?.photoUrl != null) {
+                                User(
+                                    user?.displayName!!,
+                                    user?.photoUrl.toString(),
+                                    true
+                                )
+                            } else {
+                                User(
+                                    user?.displayName!!,
+                                    "https://firebasestorage.googleapis.com/v0/b/cooking-forum.appspot.com/o/userProfileImage%2Fuser_profile_placeholder.png?alt=media&token=bc97706a-2a5c-4365-a9e7-d48ed8602b45",
+                                    true
+                                )
+                            }
+                            FirebaseDatabase.getInstance().reference.child("users/${user?.uid}")
+                                .setValue(userDb)
+                        }
+                    }
+                    onBindingUserSignedInProfile()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("AccountViewModel", "Fail to save user info!!!")
+                }
             }
-            FirebaseDatabase.getInstance().reference.child("users/${user.uid}}").setValue(userDb)
+            FirebaseDatabase.getInstance().reference.child("users/${user?.uid}")
+                .addListenerForSingleValueEvent(listenerForSingleValueEvent)
         }
     }
 
