@@ -1,4 +1,4 @@
-package com.binh.android.cookies.home
+package com.binh.android.cookies.home.postlist.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

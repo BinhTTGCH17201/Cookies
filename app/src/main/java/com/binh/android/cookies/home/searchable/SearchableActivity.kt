@@ -1,4 +1,4 @@
-package com.binh.android.cookies.searchable
+package com.binh.android.cookies.home.searchable
 
 import android.os.Bundle
 import android.widget.ImageView
@@ -18,9 +18,9 @@ import com.binh.android.cookies.R
 import com.binh.android.cookies.data.PostSearched
 import com.binh.android.cookies.databinding.ActivitySearchableBinding
 import com.binh.android.cookies.home.detail.PostDetailsActivity
-import com.binh.android.cookies.searchable.adapter.PostSearchAdapter
-import com.binh.android.cookies.searchable.viewmodel.PostSearchViewModel
-import com.binh.android.cookies.searchable.viewmodel.PostSearchViewModelFactory
+import com.binh.android.cookies.home.searchable.adapter.PostSearchAdapter
+import com.binh.android.cookies.home.searchable.viewmodel.PostSearchViewModel
+import com.binh.android.cookies.home.searchable.viewmodel.PostSearchViewModelFactory
 
 class SearchableActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchableBinding

@@ -1,4 +1,4 @@
-package com.binh.android.cookies.searchable.viewmodel
+package com.binh.android.cookies.home.searchable.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.ViewModel

@@ -1,4 +1,4 @@
-package com.binh.android.cookies.home
+package com.binh.android.cookies.home.postlist
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,6 +15,7 @@ import com.binh.android.cookies.R
 import com.binh.android.cookies.data.Post
 import com.binh.android.cookies.databinding.FragmentPostListBinding
 import com.binh.android.cookies.home.detail.PostDetailsActivity
+import com.binh.android.cookies.home.postlist.adapter.PostListAdapter
 import com.binh.android.cookies.home.viewmodel.PostListViewModel
 import com.binh.android.cookies.home.viewmodel.PostListViewModelFactory
 import com.firebase.ui.database.FirebaseRecyclerOptions

@@ -7,32 +7,35 @@
 
     <application
         android:name=".data.FirebaseApp"
-        android:fullBackupContent="true"
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Cookies">
         <activity
-            android:name=".searchable.SearchableActivity"
-            android:theme="@style/Theme.Cookies.NoActionBar"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".home.detail.PostDetailsActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
-            android:label=""
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".MainActivity"
-            android:theme="@style/AppTheme.Splash"
-            android:windowSoftInputMode="adjustPan">
+            android:name=".SplashScreen"
+            android:theme="@style/AppTheme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.binh.android.cookies.home.searchable.SearchableActivity"
+            android:theme="@style/Theme.Cookies.NoActionBar"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".home.detail.PostDetailsActivity"
+            android:label=""
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/Theme.Cookies"
+            android:windowSoftInputMode="adjustPan" />
     </application>
 
 </manifest>

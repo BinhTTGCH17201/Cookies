@@ -11,8 +11,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.binh.android.cookies.data.User
 import com.binh.android.cookies.databinding.ActivityMainBinding
-import com.binh.android.cookies.home.PostListFragmentDirections
-import com.binh.android.cookies.searchable.SearchableActivity
+import com.binh.android.cookies.home.postlist.PostListFragmentDirections
+import com.binh.android.cookies.home.searchable.SearchableActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -27,7 +27,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(R.style.Theme_Cookies)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 

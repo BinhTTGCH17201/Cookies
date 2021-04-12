@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/postList"
-        android:name="com.binh.android.cookies.home.PostListFragment"
+        android:name="com.binh.android.cookies.home.postlist.PostListFragment"
         android:label="Recipes">
         <action
             android:id="@+id/action_postList_to_addNewPost"

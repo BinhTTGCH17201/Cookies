@@ -1,4 +1,4 @@
-package com.binh.android.cookies.searchable.adapter
+package com.binh.android.cookies.home.searchable.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
