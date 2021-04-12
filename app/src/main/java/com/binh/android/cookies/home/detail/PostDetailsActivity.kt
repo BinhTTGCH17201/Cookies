@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
@@ -32,6 +31,8 @@ class PostDetailsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPostDetailsBinding
 
     private lateinit var firebaseAuthStateListener: FirebaseAuth.AuthStateListener
+
+    private val user = FirebaseAuth.getInstance().currentUser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,23 +84,26 @@ class PostDetailsActivity : AppCompatActivity() {
     }
 
     private fun setUpObserver() {
-        postDetailsViewModel.thisPostLiked.observe(this, {
-            when (it) {
-                true -> binding.toolbar.menu.findItem(R.id.action_like).setIcon(R.drawable.ic_like)
-                false -> binding.toolbar.menu.findItem(R.id.action_like)
-                    .setIcon(R.drawable.ic_unlike)
-            }
-        })
+        user?.let {
+            postDetailsViewModel.thisPostLiked.observe(this, {
+                when (it) {
+                    true -> binding.toolbar.menu.findItem(R.id.action_like)
+                        .setIcon(R.drawable.ic_like)
+                    false -> binding.toolbar.menu.findItem(R.id.action_like)
+                        .setIcon(R.drawable.ic_unlike)
+                }
+            })
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener)
+        user?.let { FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener) }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener)
+        user?.let { FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener) }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -111,23 +115,13 @@ class PostDetailsActivity : AppCompatActivity() {
         firebaseAuthStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             val commentInputGroupView = binding.postContent.commentInputGroup
-            if (user != null) commentInputGroupView.visibility = LinearLayout.VISIBLE
-            else commentInputGroupView.visibility = LinearLayout.GONE
+            commentInputGroupView.visibility = user?.let { commentInputGroupView.visibility }
+                ?: run { commentInputGroupView.visibility }
         }
     }
 
     private fun bind() {
         postDetailsViewModel.post.observe(this, { post ->
-            binding.postContent.apply {
-                postTitle.text = post.title
-                postIngredient.text = post.ingredient
-                postTimePeople.text = getString(
-                    R.string.time_people_text,
-                    post.people.toString(),
-                    post.time.toString()
-                )
-                postPreparation.text = post.preparation
-            }
             Glide.with(binding.postImage)
                 .load(post.photoUrl)
                 .apply(
@@ -155,13 +149,15 @@ class PostDetailsActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.detail_menu, menu)
         val user = FirebaseAuth.getInstance().currentUser
-        if (user != null) {
+        user?.let {
             FirebaseDatabase.getInstance().reference.child("users").child(user.uid).get()
                 .addOnSuccessListener { task ->
                     val userDb = task.getValue(User::class.java)
                     binding.toolbar.menu.findItem(R.id.action_update).isVisible = userDb?.admin!!
+
                 }
-        } else binding.toolbar.menu.findItem(R.id.action_update).isVisible = false
+        } ?: run { binding.toolbar.menu.findItem(R.id.action_update).isVisible = false }
+        binding.toolbar.menu.findItem(R.id.action_like).isVisible = (user != null)
         return super.onCreateOptionsMenu(menu)
     }
 

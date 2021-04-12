@@ -84,12 +84,14 @@ class PostDetailsViewModel(postId: String, application: Application) :
     @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     private suspend fun getPostLiked(postId: String) {
         withContext(Dispatchers.IO) {
-            val doesPostLiked = async {
-                FirebaseDatabase.getInstance().reference.child("users/${user.uid}/likedPosts/${postId}")
-                    .get().await().exists()
+            user?.let {
+                val doesPostLiked = async {
+                    FirebaseDatabase.getInstance().reference.child("users/${user.uid}/likedPosts/${postId}")
+                        .get().await().exists()
+                }
+                Log.d("PostLikeTest", "Post like: ${doesPostLiked.await()}")
+                _thisPostLiked.postValue(doesPostLiked.await())
             }
-            Log.d("PostLikeTest", "Post like: ${doesPostLiked.await()}")
-            _thisPostLiked.postValue(doesPostLiked.await())
         }
     }
 
