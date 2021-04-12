@@ -3,6 +3,8 @@ package com.binh.android.cookies.home.searchable.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.algolia.instantsearch.core.connection.ConnectionHandler
@@ -48,5 +50,18 @@ class PostSearchViewModel(application: Application) : AndroidViewModel(applicati
         super.onCleared()
         searcher.cancel()
         connection.clear()
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class PostSearchViewModelFactory constructor(
+        private val application: Application
+    ) :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(PostSearchViewModel::class.java)) {
+                return PostSearchViewModel(application) as T
+            }
+            throw IllegalArgumentException("ViewModel Not Found")
+        }
     }
 }

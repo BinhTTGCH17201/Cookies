@@ -1,11 +1,7 @@
 package com.binh.android.cookies.home.detail.viewmodel
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.binh.android.cookies.data.Comment
 import com.binh.android.cookies.data.Post
 import com.google.firebase.auth.FirebaseAuth
@@ -21,8 +17,7 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "PostDetailsViewModel"
 
-class PostDetailsViewModel(postId: String, application: Application) :
-    AndroidViewModel(application) {
+class PostDetailsViewModel(postId: String) : ViewModel() {
     private val databaseRef = FirebaseDatabase.getInstance().reference
     private val user = FirebaseAuth.getInstance().currentUser
     var post = MutableLiveData<Post>()
@@ -32,6 +27,36 @@ class PostDetailsViewModel(postId: String, application: Application) :
     private val _thisPostLiked = MutableLiveData<Boolean>()
     val thisPostLiked: LiveData<Boolean>
         get() = _thisPostLiked
+
+    private val _isLoggedIn = MutableLiveData<Boolean>()
+    val isLoggedIn: LiveData<Boolean>
+        get() = _isLoggedIn
+
+    private val _isAdmin = MutableLiveData<Boolean>()
+    val isAdmin: LiveData<Boolean>
+        get() = _isAdmin
+
+    private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+        val user = auth.currentUser
+        viewModelScope.launch(Dispatchers.IO) {
+            user?.let {
+                _isLoggedIn.postValue(true)
+                val userDb =
+                    FirebaseDatabase.getInstance().reference.child("users/${user.uid}/admin").get()
+                        .await().getValue(Boolean::class.java)
+                userDb?.let {
+                    _isAdmin.postValue(it)
+                }
+            } ?: kotlin.run {
+                _isLoggedIn.postValue(false)
+                _isAdmin.postValue(false)
+            }
+        }
+    }
+
+    init {
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
+    }
 
     var commentContent = MutableLiveData<String>()
 
@@ -123,6 +148,7 @@ class PostDetailsViewModel(postId: String, application: Application) :
             removeEventListener(valueEventListenerPost)
             removeEventListener(likeNumberListener)
         }
+        FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
     }
 
     fun submitComment() {
@@ -142,6 +168,18 @@ class PostDetailsViewModel(postId: String, application: Application) :
                 if (it.isSuccessful) Log.d(TAG, "Successful add comment")
                 commentContent.postValue("")
             }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class PostDetailsViewModelFactory constructor(
+        private val postId: String,
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(PostDetailsViewModel::class.java)) {
+                return PostDetailsViewModel(postId) as T
+            }
+            throw IllegalArgumentException("ViewModel Not Found")
         }
     }
 }

@@ -3,10 +3,10 @@ package com.binh.android.cookies.home.searchable
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
 import com.algolia.instantsearch.core.connection.ConnectionHandler
 import com.algolia.instantsearch.helper.android.item.StatsTextView
 import com.algolia.instantsearch.helper.android.list.autoScrollToStart
@@ -20,11 +20,12 @@ import com.binh.android.cookies.databinding.ActivitySearchableBinding
 import com.binh.android.cookies.home.detail.PostDetailsActivity
 import com.binh.android.cookies.home.searchable.adapter.PostSearchAdapter
 import com.binh.android.cookies.home.searchable.viewmodel.PostSearchViewModel
-import com.binh.android.cookies.home.searchable.viewmodel.PostSearchViewModelFactory
 
 class SearchableActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchableBinding
-    private lateinit var postSearchViewModel: PostSearchViewModel
+    private val postSearchViewModel by viewModels<PostSearchViewModel> {
+        PostSearchViewModel.PostSearchViewModelFactory(application)
+    }
     private val connection = ConnectionHandler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,11 +35,6 @@ class SearchableActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbarSearch)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Search recipe"
-
-        val viewModelFactory = PostSearchViewModelFactory(application)
-
-        postSearchViewModel =
-            ViewModelProvider(this, viewModelFactory).get(PostSearchViewModel::class.java)
 
         val adapterPost = PostSearchAdapter(this::onItemClicked)
         postSearchViewModel.posts.observe(this, { hits -> adapterPost.submitList(hits) })

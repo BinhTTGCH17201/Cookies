@@ -1,13 +1,9 @@
-package com.binh.android.cookies.newpost.viewmodel
+package com.binh.android.cookies.home.newpost.viewmodel
 
-import android.app.Application
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.binh.android.cookies.data.Post
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -22,8 +18,7 @@ import kotlin.math.roundToInt
 
 private const val TAG = "NewPostViewModel"
 
-class NewPostViewModel(application: Application) :
-    AndroidViewModel(application) {
+class NewPostViewModel : ViewModel() {
     private val database = FirebaseDatabase.getInstance().reference
     private val storage = FirebaseStorage.getInstance().reference
 
@@ -226,6 +221,16 @@ class NewPostViewModel(application: Application) :
                 onUploadComplete()
             }
         }
+    }
 
+    @Suppress("UNCHECKED_CAST")
+    class NewPostViewModelFactory :
+        ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(NewPostViewModel::class.java)) {
+                return NewPostViewModel() as T
+            }
+            throw IllegalArgumentException("ViewModel Not Found")
+        }
     }
 }

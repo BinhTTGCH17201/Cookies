@@ -4,10 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
-        <variable
-            name="viewModel"
-            type="com.binh.android.cookies.home.viewmodel.PostListViewModel" />
     </data>
 
     <ScrollView

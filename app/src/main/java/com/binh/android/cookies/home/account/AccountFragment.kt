@@ -1,4 +1,4 @@
-package com.binh.android.cookies.account
+package com.binh.android.cookies.home.account
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.binh.android.cookies.R
 import com.binh.android.cookies.databinding.FragmentAccountBinding
 import com.firebase.ui.auth.AuthUI
@@ -29,9 +29,9 @@ class AccountFragment : Fragment() {
 
     private lateinit var binding: FragmentAccountBinding
 
-    private lateinit var accountViewModel: AccountViewModel
-
-    private lateinit var firebaseAuthStateListener: FirebaseAuth.AuthStateListener
+    private val accountViewModel by viewModels<AccountViewModel> {
+        AccountViewModel.AccountViewModelFactory(requireActivity().application)
+    }
 
     private lateinit var bottomNavView: BottomNavigationView
 
@@ -45,26 +45,15 @@ class AccountFragment : Fragment() {
 
         (activity as AppCompatActivity).supportActionBar?.title = "Account"
 
-        // Initialize view model
-        val application = requireNotNull(this.activity).application
-
-        val viewModelFactory = AccountViewModelFactory(application)
-
-        accountViewModel =
-            ViewModelProvider(this, viewModelFactory).get(AccountViewModel::class.java)
-
         binding.viewModel = accountViewModel
 
         binding.lifecycleOwner = this
 
         bottomNavView = activity?.findViewById(R.id.bottom_navigation)!!
 
-
         checkUserLoggedIn()
 
         checkUserProfileChanged()
-
-        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener)
 
         return binding.root
     }
@@ -90,9 +79,8 @@ class AccountFragment : Fragment() {
     }
 
     private fun checkUserLoggedIn() {
-        firebaseAuthStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user != null) {
+        accountViewModel.isLoggedIn.observe(viewLifecycleOwner, {
+            if (it) {
                 accountViewModel.onLoggedIn()
                 binding.accountImage.setOnClickListener {
                     setUpImagePicker()
@@ -111,12 +99,7 @@ class AccountFragment : Fragment() {
                     launchSignInFlow()
                 }
             }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener)
+        })
     }
 
     private fun launchSignInFlow() {

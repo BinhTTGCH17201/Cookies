@@ -5,7 +5,7 @@
     app:startDestination="@id/postList">
     <fragment
         android:id="@+id/addNewPost"
-        android:name="com.binh.android.cookies.newpost.AddNewPostFragment"
+        android:name="com.binh.android.cookies.home.newpost.AddNewPostFragment"
         android:label="Add new recipe">
         <argument
             android:name="editPost"
@@ -27,6 +27,6 @@
     </fragment>
     <fragment
         android:id="@+id/accountFragment"
-        android:name="com.binh.android.cookies.account.AccountFragment"
+        android:name="com.binh.android.cookies.home.account.AccountFragment"
         android:label="Account" />
 </navigation>

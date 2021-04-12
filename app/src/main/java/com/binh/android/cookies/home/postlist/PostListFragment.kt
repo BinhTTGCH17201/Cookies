@@ -10,20 +10,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.binh.android.cookies.R
 import com.binh.android.cookies.data.Post
 import com.binh.android.cookies.databinding.FragmentPostListBinding
 import com.binh.android.cookies.home.detail.PostDetailsActivity
 import com.binh.android.cookies.home.postlist.adapter.PostListAdapter
-import com.binh.android.cookies.home.viewmodel.PostListViewModel
-import com.binh.android.cookies.home.viewmodel.PostListViewModelFactory
 import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.firebase.database.FirebaseDatabase
 
 class PostListFragment : Fragment() {
 
-    private lateinit var postListViewModel: PostListViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,18 +29,7 @@ class PostListFragment : Fragment() {
 
         (activity as AppCompatActivity).supportActionBar?.title = "Cookies"
 
-        val application = requireNotNull(this.activity).application
-
         val dataSource = FirebaseDatabase.getInstance()
-
-        val viewModelFactory = PostListViewModelFactory(dataSource, application)
-
-        postListViewModel =
-            ViewModelProvider(this, viewModelFactory).get(PostListViewModel::class.java)
-
-        binding.viewModel = postListViewModel
-
-        binding.lifecycleOwner = this
 
         // Setup RecyclerView for FirebaseUI
         val easyQuery = dataSource.reference.child("posts").orderByChild("type").equalTo("Easy")

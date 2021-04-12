@@ -5,34 +5,30 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ShareCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
 import com.binh.android.cookies.MainActivity
 import com.binh.android.cookies.R
 import com.binh.android.cookies.data.Comment
-import com.binh.android.cookies.data.User
 import com.binh.android.cookies.databinding.ActivityPostDetailsBinding
 import com.binh.android.cookies.home.detail.adapter.CommentAdapter
 import com.binh.android.cookies.home.detail.viewmodel.PostDetailsViewModel
-import com.binh.android.cookies.home.detail.viewmodel.PostDetailsViewModelFactory
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.firebase.ui.database.FirebaseRecyclerOptions
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 class PostDetailsActivity : AppCompatActivity() {
-    private lateinit var postDetailsViewModel: PostDetailsViewModel
+    private val postDetailsViewModel by viewModels<PostDetailsViewModel> {
+        PostDetailsViewModel.PostDetailsViewModelFactory(intent.extras?.getString(KEY_POST_ID)!!)
+    }
 
     private lateinit var binding: ActivityPostDetailsBinding
-
-    private lateinit var firebaseAuthStateListener: FirebaseAuth.AuthStateListener
-
-    private val user = FirebaseAuth.getInstance().currentUser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,12 +37,6 @@ class PostDetailsActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_post_details)
 
         binding.lifecycleOwner = this
-
-        val viewModelFactory =
-            PostDetailsViewModelFactory(intent.extras?.getString(KEY_POST_ID)!!, application)
-
-        postDetailsViewModel =
-            ViewModelProvider(this, viewModelFactory).get(PostDetailsViewModel::class.java)
 
         binding.postContent.viewModel = postDetailsViewModel
 
@@ -57,9 +47,6 @@ class PostDetailsActivity : AppCompatActivity() {
         checkAuth()
 
         setUpComments()
-
-        setUpObserver()
-
     }
 
     private fun setUpToolbar() {
@@ -84,26 +71,14 @@ class PostDetailsActivity : AppCompatActivity() {
     }
 
     private fun setUpObserver() {
-        user?.let {
-            postDetailsViewModel.thisPostLiked.observe(this, {
-                when (it) {
-                    true -> binding.toolbar.menu.findItem(R.id.action_like)
-                        .setIcon(R.drawable.ic_like)
-                    false -> binding.toolbar.menu.findItem(R.id.action_like)
-                        .setIcon(R.drawable.ic_unlike)
-                }
-            })
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        user?.let { FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener) }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        user?.let { FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener) }
+        postDetailsViewModel.thisPostLiked.observe(this, {
+            when (it) {
+                true -> binding.toolbar.menu.findItem(R.id.action_like)
+                    .setIcon(R.drawable.ic_like)
+                false -> binding.toolbar.menu.findItem(R.id.action_like)
+                    .setIcon(R.drawable.ic_unlike)
+            }
+        })
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -112,12 +87,9 @@ class PostDetailsActivity : AppCompatActivity() {
     }
 
     private fun checkAuth() {
-        firebaseAuthStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            val commentInputGroupView = binding.postContent.commentInputGroup
-            commentInputGroupView.visibility = user?.let { commentInputGroupView.visibility }
-                ?: run { commentInputGroupView.visibility }
-        }
+        postDetailsViewModel.isLoggedIn.observe(this, {
+            binding.postContent.commentInputGroup.visibility = if (it) View.VISIBLE else View.GONE
+        })
     }
 
     private fun bind() {
@@ -148,16 +120,11 @@ class PostDetailsActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.detail_menu, menu)
-        val user = FirebaseAuth.getInstance().currentUser
-        user?.let {
-            FirebaseDatabase.getInstance().reference.child("users").child(user.uid).get()
-                .addOnSuccessListener { task ->
-                    val userDb = task.getValue(User::class.java)
-                    binding.toolbar.menu.findItem(R.id.action_update).isVisible = userDb?.admin!!
-
-                }
-        } ?: run { binding.toolbar.menu.findItem(R.id.action_update).isVisible = false }
-        binding.toolbar.menu.findItem(R.id.action_like).isVisible = (user != null)
+        postDetailsViewModel.isAdmin.observe(this, {
+            binding.toolbar.menu.findItem(R.id.action_update).isVisible = it
+            binding.toolbar.menu.findItem(R.id.action_like).isVisible = it
+        })
+        setUpObserver()
         return super.onCreateOptionsMenu(menu)
     }
 

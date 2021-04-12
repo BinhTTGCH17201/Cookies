@@ -1,6 +1,5 @@
 package com.binh.android.cookies.utils
 
-import android.net.Uri
 import android.widget.ImageView
 import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
@@ -10,8 +9,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 
 @BindingAdapter("accountImageUrl")
-fun accountImageUrl(photoImage: ImageView, imageUrl: Uri?) {
+fun accountImageUrl(photoImage: ImageView, imageUrl: Any?) {
     if (imageUrl != null) {
+        when (imageUrl) {
+            String -> imageUrl.toString().toUri()
+        }
         Glide.with(photoImage)
             .load(imageUrl)
             .apply(
@@ -19,7 +21,7 @@ fun accountImageUrl(photoImage: ImageView, imageUrl: Uri?) {
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .circleCrop()
                     .placeholder(R.drawable.loading_animation)
-                    .error(R.drawable.user_profile_placeholder)
+                    .error(R.drawable.ic_account_default)
             ).into(photoImage)
     } else {
         Glide.with(photoImage)
@@ -41,6 +43,28 @@ fun postImageUrl(photoImage: ImageView, imageUrl: Any?) {
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .centerCrop()
                     .placeholder(R.drawable.loading_animation)
+                    .error(R.drawable.ic_broken_image)
+            ).into(photoImage)
+    } else {
+        Glide.with(photoImage)
+            .load(R.drawable.choose_image_placeholder)
+            .into(photoImage)
+    }
+}
+
+@BindingAdapter("postEditImageUrl")
+fun postEditImageUrl(photoImage: ImageView, imageUrl: Any?) {
+    if (imageUrl != null) {
+        when (imageUrl) {
+            String -> imageUrl.toString().toUri()
+        }
+        Glide.with(photoImage)
+            .load(imageUrl)
+            .apply(
+                RequestOptions()
+                    .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .centerCrop()
+                    .placeholder(R.drawable.choose_image_placeholder)
                     .error(R.drawable.ic_broken_image)
             ).into(photoImage)
     } else {

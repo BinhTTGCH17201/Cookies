@@ -1,4 +1,4 @@
-package com.binh.android.cookies.newpost
+package com.binh.android.cookies.home.newpost
 
 import android.app.Activity
 import android.content.Intent
@@ -11,13 +11,12 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import com.binh.android.cookies.R
 import com.binh.android.cookies.databinding.FragmentAddNewPostBinding
-import com.binh.android.cookies.newpost.viewmodel.NewPostViewModel
-import com.binh.android.cookies.newpost.viewmodel.NewPostViewModelFactory
+import com.binh.android.cookies.home.newpost.viewmodel.NewPostViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +28,9 @@ class AddNewPostFragment : Fragment() {
         const val RC_PHOTO_PICKER = 1
     }
 
-    private lateinit var newPostViewModel: NewPostViewModel
+    private val newPostViewModel by viewModels<NewPostViewModel> {
+        NewPostViewModel.NewPostViewModelFactory()
+    }
 
     private lateinit var binding: FragmentAddNewPostBinding
 
@@ -46,13 +47,6 @@ class AddNewPostFragment : Fragment() {
     ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_add_new_post, container, false)
-
-        val application = requireNotNull(this.activity).application
-
-        val viewModelFactory = NewPostViewModelFactory(application)
-
-        newPostViewModel =
-            ViewModelProvider(this, viewModelFactory).get(NewPostViewModel::class.java)
 
         binding.lifecycleOwner = this
 

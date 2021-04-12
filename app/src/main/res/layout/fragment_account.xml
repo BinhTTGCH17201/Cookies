@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.binh.android.cookies.account.AccountViewModel" />
+            type="com.binh.android.cookies.home.account.AccountViewModel" />
     </data>
 
     <ScrollView
@@ -20,7 +20,7 @@
             android:id="@+id/account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:context=".account.AccountFragment">
+            tools:context=".home.account.AccountFragment">
 
             <ImageView
                 android:id="@+id/account_image"
@@ -33,7 +33,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/user_profile_placeholder" />
+                tools:srcCompat="@drawable/ic_account_default" />
 
             <TextView
                 android:id="@+id/email_text"

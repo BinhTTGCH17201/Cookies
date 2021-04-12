@@ -46,4 +46,5 @@
     <string name="add_new_recipe_label">New recipe</string>
     <string name="like_action_label">Like</string>
     <string name="like_label">%s people like this</string>
+    <string name="select_food_type">Select food type</string>
 </resources>

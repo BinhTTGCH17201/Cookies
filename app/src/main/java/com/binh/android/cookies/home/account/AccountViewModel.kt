@@ -1,12 +1,10 @@
-package com.binh.android.cookies.account
+package com.binh.android.cookies.home.account
 
 import android.app.Application
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.core.net.toUri
+import androidx.lifecycle.*
 import com.binh.android.cookies.R
 import com.binh.android.cookies.data.User
 import com.google.firebase.auth.FirebaseAuth
@@ -32,6 +30,10 @@ class AccountViewModel(application: Application) :
     val uiVisible: LiveData<Boolean>
         get() = _uiVisible
 
+    private val _isLoggedIn = MutableLiveData<Boolean>()
+    val isLoggedIn: LiveData<Boolean>
+        get() = _isLoggedIn
+
     private val _buttonText = MutableLiveData<String>()
     val buttonText: LiveData<String>
         get() = _buttonText
@@ -45,35 +47,51 @@ class AccountViewModel(application: Application) :
     private val _email = MutableLiveData<String?>()
     val email: LiveData<String?>
         get() = _email
-//    var email = MutableLiveData<String?>()
 
     var password = MutableLiveData<String?>()
 
     var rePassword = MutableLiveData<String?>()
 
-    private val _photoUrl = MutableLiveData<Uri?>()
-    val photoUrl: LiveData<Uri?>
+    private val _photoUrl = MutableLiveData<String?>()
+    val photoUrl: LiveData<String?>
         get() = _photoUrl
+
+    override fun onCleared() {
+        super.onCleared()
+        FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
+    }
+
+    private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+        val user = auth.currentUser
+        viewModelScope.launch(Dispatchers.IO) {
+            user?.let {
+                val userDb =
+                    FirebaseDatabase.getInstance().reference.child("users/${user.uid}/admin").get()
+                        .await().getValue(Boolean::class.java)
+                userDb?.let {
+                    _isLoggedIn.postValue(it)
+                }
+            } ?: kotlin.run { _isLoggedIn.postValue(false) }
+        }
+    }
 
     init {
         _uiVisible.value = true
-        user?.let {
-            name.value = ""
-            _email.value = ""
-            password.value = ""
-            rePassword.value = ""
-            _uiVisible.value = false
-            _buttonText.value = "Sign In"
-            _photoUrl.value = user?.photoUrl
-            _isProfileChanged.value = null
-        }
+        name.value = ""
+        _email.value = ""
+        password.value = ""
+        rePassword.value = ""
+        _uiVisible.value = false
+        _buttonText.value = ""
+        _isProfileChanged.value = null
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
     }
 
     private fun onBindingUserSignedInProfile() {
         user?.let {
             name.value = it.displayName!!
             _email.value = it.email!!
-            _photoUrl.value = it.photoUrl
+            _photoUrl.value = it.photoUrl?.toString()
         }
     }
 
@@ -149,7 +167,7 @@ class AccountViewModel(application: Application) :
                     }
                 }
 
-                if (user?.photoUrl != photoUrl.value) uploadProfileImage()
+                if (user?.photoUrl.toString() != photoUrl.value) uploadProfileImage()
 
                 user?.reload()
                 user = FirebaseAuth.getInstance().currentUser
@@ -173,13 +191,13 @@ class AccountViewModel(application: Application) :
     }
 
     fun updateProfileImagePreview(photoUrl: Uri?) {
-        _photoUrl.value = photoUrl
+        _photoUrl.value = photoUrl.toString()
     }
 
     private suspend fun uploadProfileImage() {
         withContext(Dispatchers.IO) {
             val imageRef = userStorage.child(user?.uid.toString())
-            val uploadTask = _photoUrl.value?.let { imageRef.putFile(it) }
+            val uploadTask = _photoUrl.value?.let { imageRef.putFile(it.toUri()) }
 
             uploadTask?.continueWithTask { task ->
                 if (!task.isSuccessful) {
@@ -198,13 +216,25 @@ class AccountViewModel(application: Application) :
 
                     user?.updateProfile(userProfileChange)
 
-                    _photoUrl.postValue(downloadUri)
+                    _photoUrl.postValue(downloadUri.toString())
 
                     _isProfileChanged.postValue(true)
                 } else {
                     Log.e(TAG, "Update user task failed!")
                 }
             }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class AccountViewModelFactory(
+        private val application: Application
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(AccountViewModel::class.java)) {
+                return AccountViewModel(application) as T
+            }
+            throw IllegalArgumentException("ViewModel Not Found")
         }
     }
 }
