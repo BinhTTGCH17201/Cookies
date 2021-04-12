@@ -18,9 +18,6 @@ import com.firebase.ui.auth.IdpResponse
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class AccountFragment : Fragment() {
 
@@ -62,9 +59,12 @@ class AccountFragment : Fragment() {
 
         bottomNavView = activity?.findViewById(R.id.bottom_navigation)!!
 
+
         checkUserLoggedIn()
 
         checkUserProfileChanged()
+
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener)
 
         return binding.root
     }
@@ -114,13 +114,8 @@ class AccountFragment : Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuthStateListener)
-    }
-
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
         FirebaseAuth.getInstance().removeAuthStateListener(firebaseAuthStateListener)
     }
 
@@ -154,9 +149,7 @@ class AccountFragment : Fragment() {
             }
         } else if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
             val selectedPhoto = data?.data
-            GlobalScope.launch(Dispatchers.IO) {
-                accountViewModel.updateProfileImagePreview(selectedPhoto)
-            }
+            accountViewModel.updateProfileImagePreview(selectedPhoto)
         }
     }
 

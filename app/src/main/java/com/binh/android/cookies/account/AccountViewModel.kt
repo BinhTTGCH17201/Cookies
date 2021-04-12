@@ -42,7 +42,10 @@ class AccountViewModel(application: Application) :
 
     val name = MutableLiveData<String?>()
 
-    var email = MutableLiveData<String?>()
+    private val _email = MutableLiveData<String?>()
+    val email: LiveData<String?>
+        get() = _email
+//    var email = MutableLiveData<String?>()
 
     var password = MutableLiveData<String?>()
 
@@ -56,7 +59,7 @@ class AccountViewModel(application: Application) :
         _uiVisible.value = true
         user?.let {
             name.value = ""
-            email.value = ""
+            _email.value = ""
             password.value = ""
             rePassword.value = ""
             _uiVisible.value = false
@@ -69,16 +72,15 @@ class AccountViewModel(application: Application) :
     private fun onBindingUserSignedInProfile() {
         user?.let {
             name.value = it.displayName!!
-            email.value = it.email!!
+            _email.value = it.email!!
             _photoUrl.value = it.photoUrl
         }
     }
 
     private fun onBindingUserSignedOutProfile() {
         user?.let {
-            Log.d("User", "User login with UID: ${user?.uid}")
             name.value = ""
-            email.value = ""
+            _email.value = ""
             _photoUrl.value = null
         }
     }
@@ -121,15 +123,22 @@ class AccountViewModel(application: Application) :
         }
     }
 
+    @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     fun updateUserProfile() {
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d(
+                TAG,
+                "Name: ${name.value}, email: ${email.value}, password: ${password.value}, rePassword: ${rePassword.value}"
+            )
             user?.let {
-                if (password.value != "" && rePassword.value != "") if (password.value == rePassword.value) {
+                if (password.value != "" && rePassword.value != "") {
                     it.updatePassword(password.value.toString()).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             _isProfileChanged.value = true
                         }
                     }
+                }
+                if (name.value != "" && name.value != user?.displayName) {
                     val newUserProfile = UserProfileChangeRequest.Builder()
                         .setDisplayName(name.value)
                         .build()
@@ -138,15 +147,24 @@ class AccountViewModel(application: Application) :
                             _isProfileChanged.value = true
                         }
                     }
-                    if (user?.photoUrl != photoUrl.value) uploadProfileImage()
+                }
 
-                    it.updateEmail(email.value.toString()).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            _isProfileChanged.value = true
-                        }
+                if (user?.photoUrl != photoUrl.value) uploadProfileImage()
+
+                user?.reload()
+                user = FirebaseAuth.getInstance().currentUser
+                user?.let {
+                    val userAdmin = userDb.child(user.uid).get().await().exists()
+                    if (userAdmin) {
+                        val admin = userDb.child("${user.uid}/admin").get().await()
+                            .getValue(Boolean::class.java) ?: false
+                        saveUserInfoToDb(admin)
                     }
+                } ?: run {
+                    Log.e(TAG, "Error to get user data!")
                 }
             }
+
         }
     }
 
@@ -179,6 +197,10 @@ class AccountViewModel(application: Application) :
                         .build()
 
                     user?.updateProfile(userProfileChange)
+
+                    _photoUrl.postValue(downloadUri)
+
+                    _isProfileChanged.postValue(true)
                 } else {
                     Log.e(TAG, "Update user task failed!")
                 }

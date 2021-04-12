@@ -19,7 +19,7 @@ fun accountImageUrl(photoImage: ImageView, imageUrl: Uri?) {
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .circleCrop()
                     .placeholder(R.drawable.loading_animation)
-                    .error(R.drawable.ic_account_default)
+                    .error(R.drawable.user_profile_placeholder)
             ).into(photoImage)
     } else {
         Glide.with(photoImage)
