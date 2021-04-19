@@ -14,6 +14,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
+import com.basgeekball.awesomevalidation.AwesomeValidation
+import com.basgeekball.awesomevalidation.ValidationStyle
+import com.basgeekball.awesomevalidation.utility.RegexTemplate
+import com.basgeekball.awesomevalidation.utility.custom.SimpleCustomValidation
 import com.binh.android.cookies.R
 import com.binh.android.cookies.databinding.FragmentAddNewPostBinding
 import com.binh.android.cookies.home.newpost.viewmodel.NewPostViewModel
@@ -31,6 +35,8 @@ class AddNewPostFragment : Fragment() {
     private val newPostViewModel by viewModels<NewPostViewModel> {
         NewPostViewModel.NewPostViewModelFactory()
     }
+
+    private val mAwesomeValidation = AwesomeValidation(ValidationStyle.TEXT_INPUT_LAYOUT)
 
     private lateinit var binding: FragmentAddNewPostBinding
 
@@ -61,6 +67,45 @@ class AddNewPostFragment : Fragment() {
         return binding.root
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.post_title_label,
+            RegexTemplate.NOT_EMPTY,
+            R.string.error_input_text
+        )
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.post_ingredient_label,
+            RegexTemplate.NOT_EMPTY,
+            R.string.error_input_text
+        )
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.post_people_label,
+            RegexTemplate.NOT_EMPTY,
+            R.string.error_input_text
+        )
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.post_time_label,
+            RegexTemplate.NOT_EMPTY,
+            R.string.error_input_text
+        )
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.post_preparation_label,
+            RegexTemplate.NOT_EMPTY,
+            R.string.error_input_text
+        )
+        mAwesomeValidation.addValidation(activity, R.id.food_type, SimpleCustomValidation { input ->
+            return@SimpleCustomValidation (input != "")
+        }, R.string.error_input_text)
+
+
+    }
+
     private fun initFragment() {
         if (args.editPost) {
             (activity as AppCompatActivity).supportActionBar?.title =
@@ -80,6 +125,7 @@ class AddNewPostFragment : Fragment() {
         binding.submit.setOnClickListener {
             if (args.editPost) newPostViewModel.editPost(args.postId!!)
             else newPostViewModel.addNewPost()
+            mAwesomeValidation.validate()
         }
 
         binding.postPhoto.setOnClickListener {

@@ -8,7 +8,6 @@ import com.binh.android.cookies.data.Post
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -38,17 +37,17 @@ class NewPostViewModel : ViewModel() {
     val deletedPost: LiveData<Boolean?>
         get() = _deletedPost
 
-    var title = MutableLiveData<String?>()
+    var title = MutableLiveData<String>()
 
-    var ingredient = MutableLiveData<String?>()
+    var ingredient = MutableLiveData<String>()
 
-    var people = MutableLiveData<String?>()
+    var people = MutableLiveData<String>()
 
-    var time = MutableLiveData<String?>()
+    var time = MutableLiveData<String>()
 
-    var preparation = MutableLiveData<String?>()
+    var preparation = MutableLiveData<String>()
 
-    var type = MutableLiveData<String?>()
+    var type = MutableLiveData<String>()
 
     private val _photoUrl = MutableLiveData<Uri?>()
     val photoUrl
@@ -61,13 +60,13 @@ class NewPostViewModel : ViewModel() {
     init {
         _deletedPost.value = null
         uploadProgress.value = 0
-        title.value = null
-        type.value = null
-        preparation.value = null
-        ingredient.value = null
-        people.value = null
+        title.value = ""
+        type.value = ""
+        preparation.value = ""
+        ingredient.value = ""
+        people.value = ""
         _photoUrl.value = null
-        time.value = null
+        time.value = ""
         _onUpload.value = null
         _uploadSuccess.value = null
     }
@@ -78,15 +77,18 @@ class NewPostViewModel : ViewModel() {
     }
 
     fun addNewPost() {
-        _onUpload.value = true
         val newPost = database.child("posts").push()
         val pushId = newPost.key
         viewModelScope.launch {
-            pushId?.let {
-                val uploadImage = async { uploadProfileImage(pushId) }
-                val addNewPost = async { pushNewPost(pushId, uploadImage.await(), newPost, false) }
+            if (title.value != "" && ingredient.value != "" && people.value != "" && time.value != "" && preparation.value != "" && type.value != "" && _photoUrl.value != null) {
+                _onUpload.value = true
+                pushId?.let {
+                    val uploadImage = async { uploadProfileImage(pushId) }
+                    val addNewPost =
+                        async { pushNewPost(pushId, uploadImage.await(), newPost, false) }
 
-                addNewPost.await()
+                    addNewPost.await()
+                }
             }
         }
     }
@@ -111,44 +113,36 @@ class NewPostViewModel : ViewModel() {
     fun deletePost(postId: String) {
         _onUpload.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            val deletingPostRef = database.child("posts").child(postId)
-            deletingPostRef.get().addOnSuccessListener {
-                if (it.exists()) {
-                    val post = it.getValue(Post::class.java)
-                    val imageRef: StorageReference =
-                        FirebaseStorage.getInstance().getReferenceFromUrl(post?.photoUrl!!)
-                    imageRef.delete().addOnSuccessListener {
-                        database.child("posts").child(postId).removeValue().addOnSuccessListener {
-                            _deletedPost.value = true
-                            _deletedPost.value = null
-                            _onUpload.postValue(null)
-                        }
-                    }
-                }
+            database.child("posts").child(postId).removeValue().addOnSuccessListener {
+                _deletedPost.value = true
+                _deletedPost.value = null
+                _onUpload.postValue(null)
             }
         }
     }
 
     fun editPost(postId: String) {
-        _onUpload.value = true
         val newPost = database.child("posts").child(postId)
         viewModelScope.launch(Dispatchers.IO) {
-            val post = newPost.get().await().getValue(Post::class.java)
-            if (post?.photoUrl == _photoUrl.value.toString()) {
-                val addNewPost =
-                    async { pushNewPost(postId, post.photoUrl, newPost, true) }
-                addNewPost.await()
-            } else {
-                val uploadImage = async { uploadProfileImage(postId) }
-                val addNewPost = async {
-                    pushNewPost(
-                        postId,
-                        uploadImage.await(),
-                        newPost,
-                        true
-                    )
+            if (title.value != "" && ingredient.value != "" && people.value != "" && time.value != "" && preparation.value != "" && type.value != "" && _photoUrl.value != null) {
+                _onUpload.value = true
+                val post = newPost.get().await().getValue(Post::class.java)
+                if (post?.photoUrl == _photoUrl.value.toString()) {
+                    val addNewPost =
+                        async { pushNewPost(postId, post.photoUrl, newPost, true) }
+                    addNewPost.await()
+                } else {
+                    val uploadImage = async { uploadProfileImage(postId) }
+                    val addNewPost = async {
+                        pushNewPost(
+                            postId,
+                            uploadImage.await(),
+                            newPost,
+                            true
+                        )
+                    }
+                    addNewPost.await()
                 }
-                addNewPost.await()
             }
         }
     }
@@ -175,13 +169,13 @@ class NewPostViewModel : ViewModel() {
     private fun onUploadComplete() {
         _onUpload.value = null
         _uploadSuccess.value = null
-        title.value = null
-        type.value = null
-        preparation.value = null
-        ingredient.value = null
-        people.value = null
+        title.value = ""
+        type.value = ""
+        preparation.value = ""
+        ingredient.value = ""
+        people.value = ""
         _photoUrl.value = null
-        time.value = null
+        time.value = ""
     }
 
     private fun pushNewPost(

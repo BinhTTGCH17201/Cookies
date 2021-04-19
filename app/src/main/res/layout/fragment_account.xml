@@ -126,7 +126,6 @@
                 android:layout_marginStart="@dimen/margin_text_field"
                 android:layout_marginTop="@dimen/margin_text_field_image"
                 android:layout_marginEnd="@dimen/margin_text_field"
-                android:onClick="@{()->viewModel.updateUserProfile()}"
                 android:text="@string/update_profile_button_text"
                 android:visibility="@{viewModel.uiVisible ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"

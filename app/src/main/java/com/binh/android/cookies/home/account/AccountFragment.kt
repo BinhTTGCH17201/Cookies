@@ -11,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.basgeekball.awesomevalidation.AwesomeValidation
+import com.basgeekball.awesomevalidation.ValidationStyle
+import com.basgeekball.awesomevalidation.utility.RegexTemplate
 import com.binh.android.cookies.R
 import com.binh.android.cookies.databinding.FragmentAccountBinding
 import com.firebase.ui.auth.AuthUI
@@ -35,6 +38,8 @@ class AccountFragment : Fragment() {
 
     private lateinit var bottomNavView: BottomNavigationView
 
+    private val mAwesomeValidation = AwesomeValidation(ValidationStyle.TEXT_INPUT_LAYOUT)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,6 +61,34 @@ class AccountFragment : Fragment() {
         checkUserProfileChanged()
 
         return binding.root
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        val regexPassword =
+            "(?=.*[a-z])(?=.*[A-Z])(?=.*[\\d])(?=.*[~`!@#\\$%\\^&\\*\\(\\)\\-_\\+=\\{\\}\\[\\]\\|\\;:\"<>,./\\?]).{8,}"
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.name_layout,
+            RegexTemplate.NOT_EMPTY,
+            R.string.error_input_text
+        )
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.password_layout,
+            regexPassword,
+            R.string.error_password_input
+        )
+        mAwesomeValidation.addValidation(
+            activity,
+            R.id.re_password_layout,
+            R.id.password_layout,
+            R.string.error_re_password_input
+        )
+        binding.updateProfileButton.setOnClickListener {
+            mAwesomeValidation.validate()
+            accountViewModel.updateUserProfile()
+        }
     }
 
     private fun checkUserProfileChanged() {
@@ -109,6 +142,7 @@ class AccountFragment : Fragment() {
 
         startActivityForResult(
             AuthUI.getInstance().createSignInIntentBuilder()
+                .setIsSmartLockEnabled(false)
                 .setAvailableProviders(
                     providers
                 ).build(), SIGN_IN_RESULT_CODE

@@ -120,16 +120,6 @@ class AccountViewModel(application: Application) :
             _uiVisible.value = true
             _buttonText.value =
                 getApplication<Application>().resources.getString(R.string.logout_button_text)
-            user?.let {
-                val userAdmin = userDb.child(user.uid).get().await().exists()
-                if (userAdmin) {
-                    val admin = userDb.child("${user.uid}/admin").get().await()
-                        .getValue(Boolean::class.java) ?: false
-                    saveUserInfoToDb(admin)
-                }
-            } ?: run {
-                Log.e(TAG, "Error to get user data!")
-            }
             onBindingUserSignedInProfile()
         }
     }

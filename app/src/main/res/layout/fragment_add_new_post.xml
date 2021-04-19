@@ -62,7 +62,6 @@
                 app:layout_constraintTop_toBottomOf="@id/post_title_label">
 
                 <AutoCompleteTextView
-                    android:hint="@string/select_food_type"
                     android:id="@+id/food_menu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -103,7 +102,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/post_ingredient_label">
-                <!--        People eat Input-->
+                <!-- People eat Input-->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/post_people_label"
                     style="@style/input_layout"
@@ -122,7 +121,7 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!--        Making time-->
+                <!-- Making time-->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/post_time_label"
                     style="@style/input_layout"
